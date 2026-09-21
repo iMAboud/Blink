@@ -34,6 +34,8 @@ public sealed class AvaloniaRegionCaptureRequest
 
     public bool EnableAnnotations { get; init; } = true;
 
+    public bool ShowImageEditingTools { get; init; } = false;
+
     /// <summary>Optional captured cursor bitmap. Ownership transfers to the capture window.</summary>
     public SKBitmap? CursorBitmap { get; init; }
 

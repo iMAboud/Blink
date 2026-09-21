@@ -337,6 +337,7 @@ public partial class RegionCaptureWindow : Window
         _editorWorkspace.AttachHostAnnotationToolbar(_annotationToolbar);
         _annotationToolbar.IsVisible = _request.EnableAnnotations;
         _annotationToolbar.ShowToolOptions = false;
+        _captureToolbar.IsVisible = _request.ShowImageEditingTools;
 
         _regionInputSurface.Width = _imageWidth;
         _regionInputSurface.Height = _imageHeight;
@@ -1056,13 +1057,29 @@ public partial class RegionCaptureWindow : Window
 
         double screenX = _request.ScreenBounds.X + Math.Round(imagePoint.X);
         double screenY = _request.ScreenBounds.Y + Math.Round(imagePoint.Y);
+
+        Rect activeMonitorRect = default;
+        PixelPoint desktopPoint = new PixelPoint((int)Math.Round(screenX), (int)Math.Round(screenY));
+        Screen? activeScreen = Screens.ScreenFromPoint(desktopPoint);
+        if (activeScreen != null)
+        {
+            double mLeft = Math.Max(0, activeScreen.Bounds.X - _request.ScreenBounds.X);
+            double mTop = Math.Max(0, activeScreen.Bounds.Y - _request.ScreenBounds.Y);
+            double mRight = Math.Min(_imageWidth, activeScreen.Bounds.X - _request.ScreenBounds.X + activeScreen.Bounds.Width);
+            double mBottom = Math.Min(_imageHeight, activeScreen.Bounds.Y - _request.ScreenBounds.Y + activeScreen.Bounds.Height);
+            if (mRight > mLeft && mBottom > mTop)
+            {
+                activeMonitorRect = new Rect(mLeft, mTop, mRight - mLeft, mBottom - mTop);
+            }
+        }
+
         SimpleWindowInfo? candidate = _windows.FirstOrDefault(window =>
             ContainsPoint(window.Rectangle, screenX, screenY));
 
         if (candidate == null)
         {
             _hoverCandidate = null;
-            _regionOverlay.HoverRectangle = default;
+            _regionOverlay.HoverRectangle = activeMonitorRect;
             return;
         }
 
@@ -1076,6 +1093,17 @@ public partial class RegionCaptureWindow : Window
         Rect hover = right > left && bottom > top
             ? new Rect(left, top, right - left, bottom - top)
             : default;
+
+        bool spansMultipleMonitors = Screens.All.Count(s =>
+        {
+            DrawingRectangle mBounds = new DrawingRectangle(s.Bounds.X, s.Bounds.Y, s.Bounds.Width, s.Bounds.Height);
+            return mBounds.IntersectsWith(candidateRectangle);
+        }) > 1;
+
+        if (spansMultipleMonitors && RegionSelectionOverlay.IsValid(activeMonitorRect))
+        {
+            hover = RegionSelectionOverlay.Intersect(hover, activeMonitorRect);
+        }
 
         _hoverCandidate = RegionSelectionOverlay.IsValid(hover) ? candidate : null;
         _regionOverlay.HoverRectangle = hover;
@@ -1488,6 +1516,7 @@ public partial class RegionCaptureWindow : Window
                     ActivateRegionTool();
                 }
                 break;
+            case RegionCaptureAction.CaptureAllMonitors:
             case RegionCaptureAction.CaptureFullscreen:
                 Complete(new Rect(0, 0, _imageWidth, _imageHeight), includeWindowInfo: false);
                 break;

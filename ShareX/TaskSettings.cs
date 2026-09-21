@@ -374,6 +374,7 @@ namespace ShareX
         #region Capture / General
 
         public bool ShowCursor = false;
+        public bool ShowImageEditingTools = false;
         public decimal ScreenshotDelay = 0;
         public bool CaptureTransparent = false;
         public bool CaptureShadow = true;
