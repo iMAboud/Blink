@@ -1104,6 +1104,9 @@ Do you still want to run it?</value>
   <data name="RegionCaptureAction_CaptureActiveMonitor" xml:space="preserve">
     <value>Capture active monitor</value>
   </data>
+  <data name="RegionCaptureAction_CaptureAllMonitors" xml:space="preserve">
+    <value>Capture all monitors</value>
+  </data>
   <data name="RegionCaptureAction_CaptureFullscreen" xml:space="preserve">
     <value>Capture fullscreen</value>
   </data>

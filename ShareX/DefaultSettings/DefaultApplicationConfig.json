@@ -98,6 +98,7 @@
     "UseDefaultCaptureSettings": true,
     "CaptureSettings": {
       "ShowCursor": false,
+      "ShowImageEditingTools": false,
       "ScreenshotDelay": 0.0,
       "CaptureTransparent": false,
       "CaptureShadow": true,
@@ -116,7 +117,7 @@
         "BackgroundDimStrength": 20,
         "RegionCaptureActionRightClick": "RemoveShapeCancelCapture",
         "RegionCaptureActionMiddleClick": "SwapToolType",
-        "RegionCaptureActionX1Click": "CaptureFullscreen",
+        "RegionCaptureActionX1Click": "CaptureAllMonitors",
         "RegionCaptureActionX2Click": "CaptureActiveMonitor",
         "ShowInfo": false,
         "UseCustomInfoText": false,

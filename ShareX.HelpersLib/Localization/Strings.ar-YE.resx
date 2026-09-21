@@ -1098,6 +1098,9 @@
   <data name="RegionCaptureAction_CaptureActiveMonitor" xml:space="preserve">
     <value>التقاط الشاشة النشطة</value>
   </data>
+  <data name="RegionCaptureAction_CaptureAllMonitors" xml:space="preserve">
+    <value>التقاط كل الشاشات</value>
+  </data>
   <data name="RegionCaptureAction_CaptureFullscreen" xml:space="preserve">
     <value>التقاط الشاشة كاملة</value>
   </data>
