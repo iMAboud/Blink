@@ -75,6 +75,8 @@ public partial class ApplicationSettingsView : UserControl, IDisposable
     private void OnRestartClick(object? sender, RoutedEventArgs e) => ViewModel.Restart();
     private void OnEditQuickTaskMenuClick(object? sender, RoutedEventArgs e) => ViewModel.EditQuickTaskMenu();
     private async void OnCheckDevBuildClick(object? sender, RoutedEventArgs e) => await ViewModel.CheckDevBuildAsync();
+    private async void OnCheckForUpdatesClick(object? sender, RoutedEventArgs e) => await ViewModel.CheckForUpdatesAsync();
+    private async void OnInstallUpdateClick(object? sender, RoutedEventArgs e) => await ViewModel.InstallUpdateAsync();
     private void OnOpenChromeExtensionClick(object? sender, RoutedEventArgs e) => ViewModel.OpenChromeExtensionPage();
     private void OnOpenFirefoxAddonClick(object? sender, RoutedEventArgs e) => ViewModel.OpenFirefoxAddonPage();
     private void OnOpenPersonalFolderClick(object? sender, RoutedEventArgs e) => ViewModel.OpenPersonalFolder();

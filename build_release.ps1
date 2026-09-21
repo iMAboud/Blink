@@ -20,6 +20,12 @@ if ($LASTEXITCODE -ne 0) {
     throw "ShareX publish failed."
 }
 
+Write-Host "Publishing Blink Updater..." -ForegroundColor Cyan
+dotnet publish (Join-Path $rootDir "ShareX.Updater\ShareX.Updater.csproj") -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:EnableWindowsTargeting=true -o $appStagingDir
+if ($LASTEXITCODE -ne 0) {
+    throw "Updater publish failed."
+}
+
 # Clean PDB and XML files from staging
 Get-ChildItem -Path $appStagingDir -Recurse -File | Where-Object { $_.Extension -eq ".pdb" -or $_.Extension -eq ".xml" } | Remove-Item -Force
 

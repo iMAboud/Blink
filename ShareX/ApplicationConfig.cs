@@ -69,7 +69,7 @@ namespace ShareX
         public HotkeyType TrayLeftDoubleClickAction = HotkeyType.None;
         public HotkeyType TrayMiddleClickAction = HotkeyType.ClipboardUploadWithContentViewer;
 
-        public bool AutoCheckUpdate = false;
+        public bool AutoCheckUpdate = true;
         public UpdateChannel UpdateChannel = UpdateChannel.Release;
         // TEMP: For backward compatibility
         public bool CheckPreReleaseUpdates = false;

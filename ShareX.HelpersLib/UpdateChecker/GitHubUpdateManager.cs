@@ -78,7 +78,7 @@ namespace ShareX.HelpersLib
             await CheckUpdate();
         }
 
-        private async Task CheckUpdate()
+        protected virtual async Task CheckUpdate()
         {
             if (AutoUpdateEnabled && !UpdateMessageWindow.IsOpen)
             {
