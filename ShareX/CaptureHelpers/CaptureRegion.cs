@@ -85,7 +85,6 @@ namespace ShareX
                 RegionCaptureOptions = taskSettings.CaptureSettingsReference.RegionCaptureOptions,
                 ImageEditorOptions = taskSettings.ToolsSettingsReference.ImageEditorOptions,
                 EnableAnnotations = !taskSettings.AdvancedSettings.RegionCaptureDisableAnnotation,
-                ShowImageEditingTools = taskSettings.CaptureSettingsReference.ShowImageEditingTools,
                 CursorBitmap = cursorBitmap,
                 CursorPosition = cursorPosition
             };

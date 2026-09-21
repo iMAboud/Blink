@@ -2597,9 +2597,6 @@
   <data name="TaskSettingsWindow_ShowCursorInScreenshots" xml:space="preserve">
     <value>إظهار المؤشر في لقطات الشاشة</value>
   </data>
-  <data name="TaskSettingsWindow_ShowImageEditingTools" xml:space="preserve">
-    <value>إظهار أدوات تعديل الصور</value>
-  </data>
   <data name="TaskSettingsWindow_ShowExitConfirmation" xml:space="preserve">
     <value>إظهار تأكيد الخروج</value>
   </data>

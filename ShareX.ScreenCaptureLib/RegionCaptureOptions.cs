@@ -45,7 +45,7 @@ namespace ShareX.ScreenCaptureLib
 
         public RegionCaptureAction RegionCaptureActionRightClick = RegionCaptureAction.RemoveShapeCancelCapture;
         public RegionCaptureAction RegionCaptureActionMiddleClick = RegionCaptureAction.SwapToolType;
-        public RegionCaptureAction RegionCaptureActionX1Click = RegionCaptureAction.CaptureAllMonitors;
+        public RegionCaptureAction RegionCaptureActionX1Click = RegionCaptureAction.CaptureFullscreen;
         public RegionCaptureAction RegionCaptureActionX2Click = RegionCaptureAction.CaptureActiveMonitor;
 
         public bool ShowInfo = false;

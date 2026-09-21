@@ -1114,9 +1114,6 @@ namespace ShareX.HelpersLib.Localization {
         public static string RegionCaptureAction_CaptureActiveMonitor {
             get { return ResourceManager.GetString("RegionCaptureAction_CaptureActiveMonitor", resourceCulture); }
         }
-        public static string RegionCaptureAction_CaptureAllMonitors {
-            get { return ResourceManager.GetString("RegionCaptureAction_CaptureAllMonitors", resourceCulture); }
-        }
         public static string RegionCaptureAction_CaptureFullscreen {
             get { return ResourceManager.GetString("RegionCaptureAction_CaptureFullscreen", resourceCulture); }
         }

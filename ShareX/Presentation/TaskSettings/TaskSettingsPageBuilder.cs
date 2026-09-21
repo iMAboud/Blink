@@ -232,7 +232,6 @@ internal sealed class TaskSettingsPageBuilder
             OverrideCard(_captureOverride, Strings.TaskSettingsWindow_OverrideCaptureSettings),
             EnabledCard(_captureOverride, Strings.TaskSettingsWindow_Screenshots,
                 Check(Strings.TaskSettingsWindow_ShowCursorInScreenshots, () => capture.ShowCursor, value => capture.ShowCursor = value),
-                Check(Strings.TaskSettingsWindow_ShowImageEditingTools, () => capture.ShowImageEditingTools, value => capture.ShowImageEditingTools = value),
                 Check(Strings.TaskSettingsWindow_HDRScreenshotColorCorrector, () => capture.HDRScreenshotColorCorrection, value => capture.HDRScreenshotColorCorrection = value)));
     }
 

@@ -2893,11 +2893,6 @@ namespace ShareX.Localization {
                 return ResourceManager.GetString("TaskSettingsWindow_ShowCursorInScreenshots", resourceCulture);
             }
         }
-        public static string TaskSettingsWindow_ShowImageEditingTools {
-            get {
-                return ResourceManager.GetString("TaskSettingsWindow_ShowImageEditingTools", resourceCulture);
-            }
-        }
         public static string TaskSettingsWindow_ScreenshotDelaySeconds {
             get {
                 return ResourceManager.GetString("TaskSettingsWindow_ScreenshotDelaySeconds", resourceCulture);
