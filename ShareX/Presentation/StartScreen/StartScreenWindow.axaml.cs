@@ -51,7 +51,11 @@ public partial class StartScreenWindow : Window
     private void OnThemeChanged(object? sender, Avalonia.Styling.ThemeVariant theme) =>
         Avalonia.Threading.Dispatcher.UIThread.Post(() => RequestedThemeVariant = theme);
 
-    private void OnGetStartedClick(object? sender, RoutedEventArgs e) => Close();
+    private void OnGetStartedClick(object? sender, RoutedEventArgs e)
+    {
+        Close();
+        SettingsIntegration.Show();
+    }
 
     private async void OnGoogleDriveLoginClick(object? sender, RoutedEventArgs e)
     {

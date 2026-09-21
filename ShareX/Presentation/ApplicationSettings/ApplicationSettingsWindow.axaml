@@ -355,6 +355,47 @@
                         </StackPanel>
                     </ScrollViewer>
 
+                    <!-- System Tray -->
+                    <ScrollViewer controls:SettingsSearch.PageId="tray" IsVisible="{Binding IsTrayPage}" HorizontalContentAlignment="Stretch" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="28,24,28,32" HorizontalAlignment="Stretch">
+                            <Grid Classes="page-title" controls:SettingsSearch.IsPageTitle="True" ColumnDefinitions="Auto,*" ColumnSpacing="9">
+                                <TextBlock Classes="icon page-title-icon" Text="{x:Static theming:LucideIcons.panel_bottom}"/>
+                                <TextBlock Grid.Column="1" Classes="page-title-text" Text="System Tray"/>
+                            </Grid>
+                            <Border Classes="section-card" controls:SettingsSearch.IsPanel="True">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Classes="section-title" Text="System Tray Options"/>
+                                    <CheckBox Classes="setting" Content="{x:Static res:Strings.ApplicationSettingsWindow_ShowTrayIcon}" IsChecked="{Binding ShowTray, Mode=TwoWay}"/>
+                                    <Grid ColumnDefinitions="220,*" ColumnSpacing="8">
+                                        <TextBlock Text="Single click action" VerticalAlignment="Center" FontWeight="Normal"/>
+                                        <ComboBox Grid.Column="1" Classes="form-control" ItemsSource="{Binding HotkeyTypeOptions}" SelectedItem="{Binding SelectedTrayLeftClickAction, Mode=TwoWay}"/>
+                                    </Grid>
+                                    <Grid ColumnDefinitions="220,*" ColumnSpacing="8">
+                                        <TextBlock Text="Double click action" VerticalAlignment="Center" FontWeight="Normal"/>
+                                        <ComboBox Grid.Column="1" Classes="form-control" ItemsSource="{Binding HotkeyTypeOptions}" SelectedItem="{Binding SelectedTrayLeftDoubleClickAction, Mode=TwoWay}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                            <Border Classes="section-card" controls:SettingsSearch.IsPanel="True">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Classes="section-title" Text="Tray Menu Customization"/>
+                                    <TextBlock Classes="hint" Text="Select which options show or hide in the system tray right-click menu. Settings and Exit cannot be removed."/>
+                                    <ItemsControl ItemsSource="{Binding TrayMenuItems}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="local:TrayMenuItemModel">
+                                                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4">
+                                                    <CheckBox IsChecked="{Binding IsVisible, Mode=TwoWay}" IsEnabled="{Binding !IsMandatory}"/>
+                                                    <TextBlock Classes="icon" Text="{Binding IconGlyph}" FontSize="15" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+
                     <!-- Advanced -->
                     <ScrollViewer controls:SettingsSearch.PageId="advanced" IsVisible="{Binding IsAdvancedPage}" HorizontalContentAlignment="Stretch" HorizontalScrollBarVisibility="Disabled">
                         <StackPanel Margin="28,24,28,32" HorizontalAlignment="Stretch">

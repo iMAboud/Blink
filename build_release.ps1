@@ -21,7 +21,7 @@ if (Test-Path $releaseDir) {
 }
 New-Item -ItemType Directory -Path $appStagingDir -Force | Out-Null
 
-Get-ChildItem -Path $binDir -Recurse -File | Where-Object { $_.Extension -ne ".pdb" } | ForEach-Object {
+Get-ChildItem -Path $binDir -Recurse -File | Where-Object { $_.Extension -ne ".pdb" -and $_.Extension -ne ".xml" } | ForEach-Object {
     $relPath = $_.FullName.Substring($binDir.Length + 1)
     $destPath = Join-Path $appStagingDir $relPath
     $destSubDir = Split-Path $destPath -Parent

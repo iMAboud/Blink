@@ -57,19 +57,36 @@ internal sealed class MainMenuBuilder
 
     public IReadOnlyList<MainMenuEntry> BuildTrayMenu()
     {
-        List<MainMenuEntry> items = new()
+        List<MainMenuEntry> items = new();
+
+        if (Program.HotkeysConfig?.Hotkeys != null)
         {
-            Item(Strings.MainMenuBuilder_Region, LucideIcons.scan, () => new CaptureRegion().Capture(true)),
-            Item(Strings.MainMenuBuilder_ScreenRecordingGif, LucideIcons.film, () => TaskHelpers.StartScreenRecording(ScreenRecordOutput.GIF, ScreenRecordStartMethod.Region)),
-            Item(Strings.MainMenuBuilder_OCR, LucideIcons.scan_text, async () => await TaskHelpers.OCRImage()),
-            Item(Strings.MainMenuBuilder_PinToScreenDialog, LucideIcons.pin, () => TaskHelpers.PinToScreen()),
-            Item(Strings.MainMenuBuilder_UploadClipboard, LucideIcons.clipboard, () => UploadManager.ClipboardUploadMainWindow()),
-            Item(Strings.MainMenuBuilder_ScreenshotsFolder, LucideIcons.folder_open, () => Run(MainFormCommand.ScreenshotsFolder)),
-            MainMenuEntry.Separator(),
-            Item(Strings.Settings_Settings, LucideIcons.settings, () => SettingsIntegration.Show()),
-            MainMenuEntry.Separator(),
-            Item(Strings.MainMenuBuilder_Exit, LucideIcons.log_out, Program.ForceClose)
-        };
+            foreach (HotkeySettings hotkey in Program.HotkeysConfig.Hotkeys)
+            {
+                if (hotkey.TaskSettings.Job == HotkeyType.None) continue;
+                string id = hotkey.TaskSettings.Job.ToString();
+                if (Program.Settings.HiddenTrayMenuItems != null && Program.Settings.HiddenTrayMenuItems.Contains(id)) continue;
+
+                HotkeySettings workflow = hotkey;
+                string title = workflow.TaskSettings.Job.GetLocalizedDescription();
+                if (workflow.HotkeyInfo.IsValidHotkey)
+                {
+                    title += $" ({workflow.HotkeyInfo})";
+                }
+
+                items.Add(Item(title, TaskHelpers.FindMenuLucideIcon(workflow.TaskSettings.Job),
+                    async () => await TaskHelpers.ExecuteJob(workflow.TaskSettings)));
+            }
+        }
+
+        if (items.Count > 0)
+        {
+            items.Add(MainMenuEntry.Separator());
+        }
+
+        items.Add(Item(Strings.Settings_Settings, LucideIcons.settings, () => SettingsIntegration.Show()));
+        items.Add(MainMenuEntry.Separator());
+        items.Add(Item(Strings.MainMenuBuilder_Exit, LucideIcons.log_out, Program.ForceClose));
 
         return items;
     }

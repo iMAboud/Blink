@@ -31,6 +31,43 @@ public sealed record LanguageOption(SupportedLanguage Value, string DisplayName,
     public override string ToString() => DisplayName;
 }
 
+public sealed class TrayMenuItemModel : INotifyPropertyChanged
+{
+    private bool _isVisible;
+
+    public string Id { get; }
+    public string Title { get; }
+    public string IconGlyph { get; }
+    public bool IsMandatory { get; }
+
+    public bool IsVisible
+    {
+        get => _isVisible;
+        set
+        {
+            if (IsMandatory) return;
+            if (_isVisible != value)
+            {
+                _isVisible = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public TrayMenuItemModel(string id, string title, string iconGlyph, bool isVisible, bool isMandatory = false)
+    {
+        Id = id;
+        Title = title;
+        IconGlyph = iconGlyph;
+        _isVisible = isMandatory || isVisible;
+        IsMandatory = isMandatory;
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+}
+
 public sealed class ClipboardFormatItem : INotifyPropertyChanged
 {
     public ClipboardFormat Model { get; }

@@ -107,6 +107,7 @@ namespace ShareX
         public Size ThumbnailSize = new Size(200, 150);
         public ThumbnailViewClickAction ThumbnailClickAction = ThumbnailViewClickAction.Default;
         public List<string> HiddenTools = new List<string>();
+        public List<string> HiddenTrayMenuItems = new List<string>();
 
         #endregion Main window
 
