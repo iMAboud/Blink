@@ -94,6 +94,31 @@ namespace ShareX.UploadersLib
                     {
                         using (HttpListenerResponse favResponse = context.Response)
                         {
+                            try
+                            {
+                                string html = Resources.OAuthCallbackPage;
+                                int idx = html.IndexOf("data:image/png;base64,");
+                                if (idx >= 0)
+                                {
+                                    int start = idx + "data:image/png;base64,".Length;
+                                    int end = html.IndexOf('"', start);
+                                    if (end > start)
+                                    {
+                                        string b64 = html.Substring(start, end - start);
+                                        byte[] iconBytes = Convert.FromBase64String(b64);
+                                        favResponse.ContentType = "image/png";
+                                        favResponse.ContentLength64 = iconBytes.Length;
+                                        favResponse.StatusCode = (int)HttpStatusCode.OK;
+                                        await favResponse.OutputStream.WriteAsync(iconBytes, cancellationToken).ConfigureAwait(false);
+                                        favResponse.KeepAlive = false;
+                                        continue;
+                                    }
+                                }
+                            }
+                            catch
+                            {
+                            }
+
                             favResponse.StatusCode = (int)HttpStatusCode.NoContent;
                             favResponse.KeepAlive = false;
                         }

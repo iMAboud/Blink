@@ -9,27 +9,19 @@ $releaseDir = Join-Path $rootDir "Release"
 $appStagingDir = Join-Path $releaseDir "App"
 $binDir = Join-Path $rootDir "ShareX\bin\Release\win-x64"
 
-Write-Host "Building Blink in Release mode..." -ForegroundColor Cyan
-dotnet build (Join-Path $rootDir "ShareX.sln") -c Release -p:Platform=x64
-if ($LASTEXITCODE -ne 0) {
-    throw "Build failed."
-}
-
-Write-Host "Staging debloated release files..." -ForegroundColor Cyan
+Write-Host "Publishing debloated Blink application for win-x64..." -ForegroundColor Cyan
 if (Test-Path $releaseDir) {
     Remove-Item $releaseDir -Recurse -Force
 }
 New-Item -ItemType Directory -Path $appStagingDir -Force | Out-Null
 
-Get-ChildItem -Path $binDir -Recurse -File | Where-Object { $_.Extension -ne ".pdb" -and $_.Extension -ne ".xml" } | ForEach-Object {
-    $relPath = $_.FullName.Substring($binDir.Length + 1)
-    $destPath = Join-Path $appStagingDir $relPath
-    $destSubDir = Split-Path $destPath -Parent
-    if (!(Test-Path $destSubDir)) {
-        New-Item -ItemType Directory -Path $destSubDir -Force | Out-Null
-    }
-    Copy-Item $_.FullName -Destination $destPath -Force
+dotnet publish (Join-Path $rootDir "ShareX\ShareX.csproj") -c Release -r win-x64 --self-contained false -p:EnableWindowsTargeting=true -o $appStagingDir
+if ($LASTEXITCODE -ne 0) {
+    throw "ShareX publish failed."
 }
+
+# Clean PDB and XML files from staging
+Get-ChildItem -Path $appStagingDir -Recurse -File | Where-Object { $_.Extension -eq ".pdb" -or $_.Extension -eq ".xml" } | Remove-Item -Force
 
 $payloadZip = Join-Path $rootDir "ShareX.Launcher\Blink_Payload.zip"
 Write-Host "Creating compressed payload archive at $payloadZip..." -ForegroundColor Cyan

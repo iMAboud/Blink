@@ -54,6 +54,36 @@ namespace ShareX
             }
         }
 
+        private const string StartupApprovedKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\StartupFolder";
+        private static readonly byte[] EnabledRegistryBytes = new byte[] { 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+        public static void EnsureStartup()
+        {
+#if !MicrosoftStore
+            try
+            {
+                ShortcutHelpers.SetShortcut(false, Environment.SpecialFolder.Startup, "ShareX");
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(StartupApprovedKey, true))
+                {
+                    key?.DeleteValue("ShareX.lnk", false);
+                }
+
+                if (State != StartupState.DisabledByUser)
+                {
+                    ShortcutHelpers.SetShortcut(true, Environment.SpecialFolder.Startup, "Blink", StartupTargetPath, "-silent");
+                    using (RegistryKey key = Registry.CurrentUser.CreateSubKey(StartupApprovedKey))
+                    {
+                        key?.SetValue("Blink.lnk", EnabledRegistryBytes, RegistryValueKind.Binary);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                DebugHelper.WriteException(e);
+            }
+#endif
+        }
+
         public static StartupState State
         {
             get
@@ -95,9 +125,24 @@ namespace ShareX
                     throw new NotSupportedException();
                 }
 #else
-                if (value == StartupState.Enabled || value == StartupState.Disabled)
+                if (value == StartupState.Enabled)
                 {
-                    ShortcutHelpers.SetShortcut(value == StartupState.Enabled, Environment.SpecialFolder.Startup, "Blink", StartupTargetPath, "-silent");
+                    ShortcutHelpers.SetShortcut(true, Environment.SpecialFolder.Startup, "Blink", StartupTargetPath, "-silent");
+                    try
+                    {
+                        using (RegistryKey key = Registry.CurrentUser.CreateSubKey(StartupApprovedKey))
+                        {
+                            key?.SetValue("Blink.lnk", EnabledRegistryBytes, RegistryValueKind.Binary);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        DebugHelper.WriteException(e);
+                    }
+                }
+                else if (value == StartupState.Disabled)
+                {
+                    ShortcutHelpers.SetShortcut(false, Environment.SpecialFolder.Startup, "Blink", StartupTargetPath, "-silent");
                 }
                 else
                 {

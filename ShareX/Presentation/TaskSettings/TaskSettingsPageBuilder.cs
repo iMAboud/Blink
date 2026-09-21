@@ -1103,10 +1103,10 @@ internal sealed class TaskSettingsPageBuilder
         List<ChoiceOption<string>> list =
         [
             new ChoiceOption<string>("", "Default"),
-            new ChoiceOption<string>("builtin:capture", "ShareX - Capture"),
-            new ChoiceOption<string>("builtin:task_completed", "ShareX - Task completed"),
-            new ChoiceOption<string>("builtin:action_completed", "ShareX - Action completed"),
-            new ChoiceOption<string>("builtin:error", "ShareX - Error")
+            new ChoiceOption<string>("builtin:capture", "Blink - Capture"),
+            new ChoiceOption<string>("builtin:task_completed", "Blink - Task completed"),
+            new ChoiceOption<string>("builtin:action_completed", "Blink - Action completed"),
+            new ChoiceOption<string>("builtin:error", "Blink - Error")
         ];
 
         try

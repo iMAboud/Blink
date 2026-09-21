@@ -398,16 +398,47 @@ namespace ShareX.HelpersLib
             return time;
         }
 
+        private static SoundPlayer _activeSoundPlayer;
+        private static readonly object _soundLock = new object();
+
+        public static void StopSound()
+        {
+            lock (_soundLock)
+            {
+                if (_activeSoundPlayer != null)
+                {
+                    try
+                    {
+                        _activeSoundPlayer.Stop();
+                        _activeSoundPlayer.Dispose();
+                    }
+                    catch
+                    {
+                    }
+                    _activeSoundPlayer = null;
+                }
+            }
+        }
+
         public static void PlaySound(Stream stream)
         {
             if (stream != null)
             {
+                StopSound();
                 Task.Run(() =>
                 {
-                    using (stream)
-                    using (SoundPlayer soundPlayer = new SoundPlayer(stream))
+                    SoundPlayer soundPlayer;
+                    lock (_soundLock)
+                    {
+                        soundPlayer = new SoundPlayer(stream);
+                        _activeSoundPlayer = soundPlayer;
+                    }
+                    try
                     {
                         soundPlayer.Play();
+                    }
+                    catch
+                    {
                     }
                 });
             }
@@ -417,12 +448,21 @@ namespace ShareX.HelpersLib
         {
             if (stream != null)
             {
+                StopSound();
                 Task.Run(() =>
                 {
-                    using (stream)
-                    using (SoundPlayer soundPlayer = new SoundPlayer(stream))
+                    SoundPlayer soundPlayer;
+                    lock (_soundLock)
+                    {
+                        soundPlayer = new SoundPlayer(stream);
+                        _activeSoundPlayer = soundPlayer;
+                    }
+                    try
                     {
                         soundPlayer.PlaySync();
+                    }
+                    catch
+                    {
                     }
                 });
             }
@@ -432,11 +472,21 @@ namespace ShareX.HelpersLib
         {
             if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
             {
+                StopSound();
                 Task.Run(() =>
                 {
-                    using (SoundPlayer soundPlayer = new SoundPlayer(filePath))
+                    SoundPlayer soundPlayer;
+                    lock (_soundLock)
+                    {
+                        soundPlayer = new SoundPlayer(filePath);
+                        _activeSoundPlayer = soundPlayer;
+                    }
+                    try
                     {
                         soundPlayer.PlaySync();
+                    }
+                    catch
+                    {
                     }
                 });
             }
