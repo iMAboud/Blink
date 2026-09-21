@@ -265,12 +265,6 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
         set => SetSetting(Settings.ThemeOptions.AccentColor, value, x => Settings.ThemeOptions.AccentColor = x);
     }
 
-    public EnumOption<HotkeyType>? SelectedTrayLeftDoubleClickAction
-    {
-        get => Find(HotkeyTypeOptions, Settings.TrayLeftDoubleClickAction);
-        set { if (value != null) SetSetting(Settings.TrayLeftDoubleClickAction, value.Value, x => Settings.TrayLeftDoubleClickAction = x); }
-    }
-
     public EnumOption<HotkeyType>? SelectedTrayLeftClickAction
     {
         get => Find(HotkeyTypeOptions, Settings.TrayLeftClickAction);

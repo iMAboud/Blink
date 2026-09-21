@@ -356,16 +356,13 @@ namespace ShareX
         {
             ImageEditorIntegration.Initialize();
 
-            if (StartupManager.State == StartupState.Disabled)
+            try
             {
-                try
-                {
-                    StartupManager.State = StartupState.Enabled;
-                }
-                catch (Exception e)
-                {
-                    DebugHelper.WriteException(e);
-                }
+                StartupManager.EnsureStartup();
+            }
+            catch (Exception e)
+            {
+                DebugHelper.WriteException(e);
             }
 
             if (Settings.ShowStartScreen && Settings.IsFirstTimeRun)

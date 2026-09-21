@@ -367,12 +367,8 @@
                                     <TextBlock Classes="section-title" Text="System Tray Options"/>
                                     <CheckBox Classes="setting" Content="{x:Static res:Strings.ApplicationSettingsWindow_ShowTrayIcon}" IsChecked="{Binding ShowTray, Mode=TwoWay}"/>
                                     <Grid ColumnDefinitions="220,*" ColumnSpacing="8">
-                                        <TextBlock Text="Single click action" VerticalAlignment="Center" FontWeight="Normal"/>
+                                        <TextBlock Text="Click Action" VerticalAlignment="Center" FontWeight="Normal"/>
                                         <ComboBox Grid.Column="1" Classes="form-control" ItemsSource="{Binding HotkeyTypeOptions}" SelectedItem="{Binding SelectedTrayLeftClickAction, Mode=TwoWay}"/>
-                                    </Grid>
-                                    <Grid ColumnDefinitions="220,*" ColumnSpacing="8">
-                                        <TextBlock Text="Double click action" VerticalAlignment="Center" FontWeight="Normal"/>
-                                        <ComboBox Grid.Column="1" Classes="form-control" ItemsSource="{Binding HotkeyTypeOptions}" SelectedItem="{Binding SelectedTrayLeftDoubleClickAction, Mode=TwoWay}"/>
                                     </Grid>
                                 </StackPanel>
                             </Border>

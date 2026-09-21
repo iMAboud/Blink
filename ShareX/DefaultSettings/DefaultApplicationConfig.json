@@ -186,7 +186,7 @@
         "Language": "en-US",
         "ScaleFactor": 2.0,
         "SingleLine": false,
-        "Silent": false,
+        "Silent": true,
         "AutoCopy": true,
         "ServiceLinks": [
           {

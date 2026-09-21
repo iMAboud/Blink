@@ -31,7 +31,7 @@ namespace ShareX.HelpersLib
 {
     public static class ShortcutHelpers
     {
-        public static bool SetShortcut(bool create, Environment.SpecialFolder specialFolder, string shortcutName, string targetPath, string arguments = "")
+        public static bool SetShortcut(bool create, Environment.SpecialFolder specialFolder, string shortcutName, string targetPath = "", string arguments = "")
         {
             string shortcutPath = GetShortcutPath(specialFolder, shortcutName);
             return SetShortcut(create, shortcutPath, targetPath, arguments);

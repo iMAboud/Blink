@@ -36,9 +36,7 @@ internal interface ITrayIconService : IDisposable
 internal sealed class WinFormsTrayIconService : ITrayIconService
 {
     private readonly NotifyIcon _notifyIcon;
-    private readonly Timer _singleClickTimer;
     private Icon? _ownedIcon;
-    private int _leftClickCount;
     private bool _disposed;
 
     public event Action? RightButtonDown;
@@ -66,11 +64,7 @@ internal sealed class WinFormsTrayIconService : ITrayIconService
         _notifyIcon.MouseDown += OnMouseDown;
         _notifyIcon.MouseUp += OnMouseUp;
 
-        _singleClickTimer = new Timer
-        {
-            Interval = SystemInformation.DoubleClickTime
-        };
-        _singleClickTimer.Tick += OnSingleClickTimerTick;
+
 
         SetIcon(icon);
         _notifyIcon.Visible = visible;
@@ -104,25 +98,7 @@ internal sealed class WinFormsTrayIconService : ITrayIconService
         switch (e.Button)
         {
             case MouseButtons.Left:
-                if (Program.Settings.TrayLeftDoubleClickAction == HotkeyType.None)
-                {
-                    await TaskHelpers.ExecuteJob(Program.Settings.TrayLeftClickAction);
-                }
-                else
-                {
-                    _leftClickCount++;
-
-                    if (_leftClickCount == 1)
-                    {
-                        _singleClickTimer.Start();
-                    }
-                    else
-                    {
-                        _leftClickCount = 0;
-                        _singleClickTimer.Stop();
-                        await TaskHelpers.ExecuteJob(Program.Settings.TrayLeftDoubleClickAction);
-                    }
-                }
+                await TaskHelpers.ExecuteJob(Program.Settings.TrayLeftClickAction);
                 break;
             case MouseButtons.Middle:
                 await TaskHelpers.ExecuteJob(Program.Settings.TrayMiddleClickAction);
@@ -133,16 +109,7 @@ internal sealed class WinFormsTrayIconService : ITrayIconService
         }
     }
 
-    private async void OnSingleClickTimerTick(object? sender, EventArgs e)
-    {
-        _singleClickTimer.Stop();
 
-        if (_leftClickCount == 1)
-        {
-            _leftClickCount = 0;
-            await TaskHelpers.ExecuteJob(Program.Settings.TrayLeftClickAction);
-        }
-    }
 
     public void Dispose()
     {
@@ -152,9 +119,7 @@ internal sealed class WinFormsTrayIconService : ITrayIconService
         }
 
         _disposed = true;
-        _singleClickTimer.Stop();
-        _singleClickTimer.Tick -= OnSingleClickTimerTick;
-        _singleClickTimer.Dispose();
+
 
         _notifyIcon.Visible = false;
         _notifyIcon.MouseDown -= OnMouseDown;
