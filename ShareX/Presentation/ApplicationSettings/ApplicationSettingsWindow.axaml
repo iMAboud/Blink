@@ -231,7 +231,7 @@
                                 <StackPanel Spacing="12">
                                     <TextBlock Classes="section-title" Text="Update Settings"/>
                                     <CheckBox Classes="setting" Content="Automatically check for updates on startup" IsChecked="{Binding AutoCheckUpdate, Mode=TwoWay}"/>
-
+                                    
                                     <Grid ColumnDefinitions="190,*" ColumnSpacing="8">
                                         <TextBlock Text="Current Version:" VerticalAlignment="Center" FontWeight="Normal"/>
                                         <TextBlock Grid.Column="1" Text="{Binding CurrentVersionText}" VerticalAlignment="Center" FontWeight="SemiBold"/>
@@ -247,7 +247,7 @@
                             <Border Classes="section-card" controls:SettingsSearch.IsPanel="True">
                                 <StackPanel Spacing="12">
                                     <TextBlock Classes="section-title" Text="Status &amp; Actions"/>
-
+                                    
                                     <TextBlock Text="{Binding UpdateStatusText}" VerticalAlignment="Center"/>
 
                                     <ProgressBar Minimum="0" Maximum="100" Value="{Binding UpdateProgress}"

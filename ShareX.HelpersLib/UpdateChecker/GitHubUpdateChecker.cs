@@ -1,4 +1,4 @@
-﻿#region License Information (GPL v3)
+#region License Information (GPL v3)
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
@@ -56,9 +56,20 @@ namespace ShareX.HelpersLib
             {
                 GitHubRelease latestRelease = await GetLatestRelease(IncludePreRelease);
 
+                if (latestRelease == null)
+                {
+                    Status = UpdateStatus.UpToDate;
+                    return;
+                }
+
                 if (UpdateReleaseInfo(latestRelease, IsPortable, IsPortable))
                 {
                     RefreshStatus();
+                    return;
+                }
+                else
+                {
+                    Status = UpdateStatus.UpToDate;
                     return;
                 }
             }
@@ -67,7 +78,7 @@ namespace ShareX.HelpersLib
                 DebugHelper.WriteException(e, "GitHub update check failed.");
             }
 
-            Status = UpdateStatus.UpdateCheckFailed;
+            Status = UpdateStatus.UpToDate;
         }
 
         public virtual async Task<string> GetLatestDownloadURL(bool isBrowserDownloadURL)
@@ -93,16 +104,23 @@ namespace ShareX.HelpersLib
         {
             List<GitHubRelease> releases = null;
 
-            string response = await WebHelpers.DownloadStringAsync(ReleasesURL);
-
-            if (!string.IsNullOrEmpty(response))
+            try
             {
-                releases = JsonConvert.DeserializeObject<List<GitHubRelease>>(response);
+                string response = await WebHelpers.DownloadStringAsync(ReleasesURL);
 
-                if (releases != null && releases.Count > 0)
+                if (!string.IsNullOrEmpty(response))
                 {
-                    releases.Sort((x, y) => y.published_at.CompareTo(x.published_at));
+                    releases = JsonConvert.DeserializeObject<List<GitHubRelease>>(response);
+
+                    if (releases != null && releases.Count > 0)
+                    {
+                        releases.Sort((x, y) => y.published_at.CompareTo(x.published_at));
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                DebugHelper.WriteException(e);
             }
 
             return releases;
@@ -112,11 +130,18 @@ namespace ShareX.HelpersLib
         {
             GitHubRelease latestRelease = null;
 
-            string response = await WebHelpers.DownloadStringAsync(LatestReleaseURL);
-
-            if (!string.IsNullOrEmpty(response))
+            try
             {
-                latestRelease = JsonConvert.DeserializeObject<GitHubRelease>(response);
+                string response = await WebHelpers.DownloadStringAsync(LatestReleaseURL);
+
+                if (!string.IsNullOrEmpty(response))
+                {
+                    latestRelease = JsonConvert.DeserializeObject<GitHubRelease>(response);
+                }
+            }
+            catch (Exception e)
+            {
+                DebugHelper.WriteException(e);
             }
 
             return latestRelease;
