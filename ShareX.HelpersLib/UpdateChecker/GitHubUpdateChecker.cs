@@ -26,6 +26,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -144,63 +145,36 @@ namespace ShareX.HelpersLib
 
         protected virtual bool UpdateReleaseInfo(GitHubRelease release, bool isPortable, bool isBrowserDownloadURL)
         {
-            if (release != null && !string.IsNullOrEmpty(release.tag_name) && release.tag_name.Length > 1 && release.tag_name[0] == 'v')
+            if (release != null && !string.IsNullOrEmpty(release.tag_name))
             {
-                LatestVersion = new Version(release.tag_name.Substring(1));
-
-                GitHubAsset asset = null;
-
-                if (isPortable)
+                string tag = release.tag_name.TrimStart('v', 'V');
+                if (!Version.TryParse(tag, out Version parsedVersion))
                 {
-                    if (RuntimeInformation.OSArchitecture == Architecture.Arm64)
+                    if (tag.Contains("."))
                     {
-                        asset = FindAsset(release, "portable-arm64.zip");
-                    }
-
-                    if (asset == null)
-                    {
-                        asset = FindAsset(release, "portable-x64.zip");
-                    }
-
-                    if (asset == null)
-                    {
-                        asset = FindAsset(release, "portable.zip");
-                    }
-                }
-                else
-                {
-                    if (RuntimeInformation.OSArchitecture == Architecture.Arm64)
-                    {
-                        asset = FindAsset(release, "setup-arm64.exe");
-                    }
-
-                    if (asset == null)
-                    {
-                        asset = FindAsset(release, "setup-x64.exe");
-                    }
-
-                    if (asset == null)
-                    {
-                        asset = FindAsset(release, "setup.exe");
+                        string[] parts = tag.Split('.');
+                        if (parts.Length == 2 && int.TryParse(parts[0], out int major) && int.TryParse(parts[1], out int minor))
+                        {
+                            parsedVersion = new Version(major, minor);
+                        }
                     }
                 }
 
-                if (asset != null)
+                if (parsedVersion != null)
                 {
-                    FileName = asset.name;
+                    LatestVersion = parsedVersion;
 
-                    if (isBrowserDownloadURL)
+                    GitHubAsset asset = FindAsset(release, "Blink.exe");
+                    if (asset == null) asset = FindAsset(release, "blink.exe");
+                    if (asset == null) asset = FindAsset(release, ".exe");
+
+                    if (asset != null)
                     {
+                        FileName = asset.name;
                         DownloadURL = asset.browser_download_url;
+                        IsPreRelease = release.prerelease;
+                        return true;
                     }
-                    else
-                    {
-                        DownloadURL = asset.url;
-                    }
-
-                    IsPreRelease = release.prerelease;
-
-                    return true;
                 }
             }
 
@@ -230,7 +204,6 @@ namespace ShareX.HelpersLib
             public string upload_url { get; set; }
             public string html_url { get; set; }
             public long id { get; set; }
-            //public GitHubAuthor author { get; set; }
             public string node_id { get; set; }
             public string tag_name { get; set; }
             public string target_commitish { get; set; }
@@ -243,7 +216,6 @@ namespace ShareX.HelpersLib
             public string tarball_url { get; set; }
             public string zipball_url { get; set; }
             public string body { get; set; }
-            //public GitHubReactions reactions { get; set; }
         }
 
         protected class GitHubAsset
@@ -253,7 +225,6 @@ namespace ShareX.HelpersLib
             public string node_id { get; set; }
             public string name { get; set; }
             public string label { get; set; }
-            //public GitHubUploader uploader { get; set; }
             public string content_type { get; set; }
             public string state { get; set; }
             public long size { get; set; }

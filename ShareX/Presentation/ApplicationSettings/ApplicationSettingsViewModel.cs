@@ -127,8 +127,9 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
     public bool IsProxyPage => IsPage("proxy");
     public bool IsTrayPage => IsPage("tray");
     public bool IsAdvancedPage => IsPage("advanced");
+    public bool IsUpdaterPage => IsPage("updater");
 
-    public bool UpdatesVisible => false;
+    public bool UpdatesVisible => true;
 
     public bool WindowsIntegrationVisible
     {
@@ -951,6 +952,7 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
         [
             Nav("general", Strings.ApplicationSettingsWindow_General, LucideIcons.settings),
             Nav("theme", Strings.ApplicationSettingsWindow_Theme, LucideIcons.palette),
+            Nav("updater", "Updater", LucideIcons.download),
             Nav("paths", Strings.ApplicationSettingsWindow_Paths, LucideIcons.folder),
             Nav("settings", Strings.ApplicationSettingsWindow_Settings, LucideIcons.database_backup),
             Nav("history", Strings.ApplicationSettingsWindow_History, LucideIcons.history),
@@ -1069,6 +1071,7 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
         OnPropertyChanged(nameof(IsProxyPage));
         OnPropertyChanged(nameof(IsTrayPage));
         OnPropertyChanged(nameof(IsAdvancedPage));
+        OnPropertyChanged(nameof(IsUpdaterPage));
     }
 
     private bool SetSetting<T>(T current, T value, Action<T> setter, [CallerMemberName] string? propertyName = null)
@@ -1296,4 +1299,207 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
             SettingManager.SaveApplicationConfigAsync();
         }
     }
+
+    private string _latestVersionText = "N/A";
+    private string _updateStatusText = "Click 'Check for Updates' to check for new releases.";
+    private double _updateProgress;
+    private bool _isUpdating;
+    private bool _isUpdateAvailable;
+
+    public string CurrentVersionText => Program.VersionText;
+
+    public string LatestVersionText
+    {
+        get => _latestVersionText;
+        set => SetField(ref _latestVersionText, value);
+    }
+
+    public string UpdateStatusText
+    {
+        get => _updateStatusText;
+        set => SetField(ref _updateStatusText, value);
+    }
+
+    public double UpdateProgress
+    {
+        get => _updateProgress;
+        set => SetField(ref _updateProgress, value);
+    }
+
+    public bool IsUpdating
+    {
+        get => _isUpdating;
+        set => SetField(ref _isUpdating, value);
+    }
+
+    public bool IsUpdateAvailable
+    {
+        get => _isUpdateAvailable;
+        set => SetField(ref _isUpdateAvailable, value);
+    }
+
+    private GitHubUpdateChecker? _currentUpdateChecker;
+
+    public async Task CheckForUpdatesAsync()
+    {
+        if (IsUpdating) return;
+
+        IsUpdating = true;
+        UpdateStatusText = "Checking for updates...";
+        UpdateProgress = 0;
+
+        try
+        {
+            _currentUpdateChecker = Program.UpdateManager.CreateUpdateChecker();
+            await _currentUpdateChecker.CheckUpdateAsync();
+
+            if (_currentUpdateChecker.Status == UpdateStatus.UpdateAvailable)
+            {
+                LatestVersionText = _currentUpdateChecker.LatestVersion?.ToString() ?? "New version";
+                UpdateStatusText = $"An update is available: v{LatestVersionText}";
+                IsUpdateAvailable = true;
+            }
+            else if (_currentUpdateChecker.Status == UpdateStatus.UpToDate)
+            {
+                LatestVersionText = CurrentVersionText;
+                UpdateStatusText = "Blink is up to date.";
+                IsUpdateAvailable = false;
+            }
+            else
+            {
+                UpdateStatusText = "Failed to check for updates. Please try again later.";
+                IsUpdateAvailable = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            UpdateStatusText = "Error checking for updates: " + ex.Message;
+            IsUpdateAvailable = false;
+        }
+        finally
+        {
+            IsUpdating = false;
+        }
+    }
+
+    public async Task InstallUpdateAsync()
+    {
+        if (IsUpdating || _currentUpdateChecker == null || string.IsNullOrEmpty(_currentUpdateChecker.DownloadURL))
+        {
+            return;
+        }
+
+        IsUpdating = true;
+        UpdateProgress = 0;
+        UpdateStatusText = "Downloading update...";
+
+        try
+        {
+            string tempDir = Path.Combine(Path.GetTempPath(), "Blink_Update");
+            Directory.CreateDirectory(tempDir);
+            string downloadPath = Path.Combine(tempDir, "Blink.exe");
+
+            Progress<double> progress = new Progress<double>(p =>
+            {
+                UpdateProgress = p;
+                UpdateStatusText = $"Downloading update... {p:0}%";
+            });
+
+            bool downloaded = await DownloadFileAsync(_currentUpdateChecker.DownloadURL, downloadPath, progress);
+
+            if (downloaded && File.Exists(downloadPath))
+            {
+                UpdateStatusText = "Download complete. Starting updater...";
+
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string rootExe = Path.GetFullPath(Path.Combine(baseDir, "..", "Blink.exe"));
+                if (!File.Exists(rootExe))
+                {
+                    rootExe = Environment.ProcessPath ?? Path.Combine(baseDir, "Blink.exe");
+                }
+
+                string updaterPath = Path.Combine(baseDir, "updater.exe");
+                if (!File.Exists(updaterPath))
+                {
+                    updaterPath = Path.Combine(baseDir, "ShareX.Updater.exe");
+                }
+
+                if (File.Exists(updaterPath))
+                {
+                    int pid = System.Diagnostics.Process.GetCurrentProcess().Id;
+                    System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = updaterPath,
+                        UseShellExecute = false
+                    };
+                    psi.ArgumentList.Add("--pid");
+                    psi.ArgumentList.Add(pid.ToString());
+                    psi.ArgumentList.Add("--new-exe");
+                    psi.ArgumentList.Add(downloadPath);
+                    psi.ArgumentList.Add("--target-exe");
+                    psi.ArgumentList.Add(rootExe);
+                    psi.ArgumentList.Add("--launch");
+
+                    System.Diagnostics.Process.Start(psi);
+                    ShareX.AvaloniaUI.Integration.AvaloniaBootstrapper.Shutdown();
+                }
+                else
+                {
+                    UpdateStatusText = "Updater executable not found.";
+                    IsUpdating = false;
+                }
+            }
+            else
+            {
+                UpdateStatusText = "Failed to download update.";
+                IsUpdating = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            UpdateStatusText = "Error installing update: " + ex.Message;
+            IsUpdating = false;
+        }
+    }
+
+    private static async Task<bool> DownloadFileAsync(string url, string destinationPath, IProgress<double> progress)
+    {
+        try
+        {
+            using (var client = new System.Net.Http.HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("User-Agent", "Blink-App");
+                using (var response = await client.GetAsync(url, System.Net.Http.HttpCompletionOption.ResponseHeadersRead))
+                {
+                    response.EnsureSuccessStatusCode();
+                    long? totalBytes = response.Content.Headers.ContentLength;
+
+                    using (var contentStream = await response.Content.ReadAsStreamAsync())
+                    using (var fileStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                    {
+                        byte[] buffer = new byte[8192];
+                        long totalRead = 0;
+                        int read;
+
+                        while ((read = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                        {
+                            await fileStream.WriteAsync(buffer, 0, read);
+                            totalRead += read;
+                            if (totalBytes.HasValue && totalBytes.Value > 0)
+                            {
+                                progress.Report((double)totalRead / totalBytes.Value * 100.0);
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+        catch (Exception ex)
+        {
+            DebugHelper.WriteException(ex);
+            return false;
+        }
+    }
+
 }

@@ -219,6 +219,49 @@
                     </ScrollViewer>
 
 
+                    <!-- Updater -->
+                    <ScrollViewer controls:SettingsSearch.PageId="updater" IsVisible="{Binding IsUpdaterPage}" HorizontalContentAlignment="Stretch" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="28,24,28,32" HorizontalAlignment="Stretch" Spacing="16">
+                            <Grid Classes="page-title" controls:SettingsSearch.IsPageTitle="True" ColumnDefinitions="Auto,*" ColumnSpacing="9">
+                                <TextBlock Classes="icon page-title-icon" Text="{x:Static theming:LucideIcons.download}"/>
+                                <TextBlock Grid.Column="1" Classes="page-title-text" Text="Updater"/>
+                            </Grid>
+
+                            <Border Classes="section-card" controls:SettingsSearch.IsPanel="True">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Classes="section-title" Text="Update Settings"/>
+                                    <CheckBox Classes="setting" Content="Automatically check for updates on startup" IsChecked="{Binding AutoCheckUpdate, Mode=TwoWay}"/>
+
+                                    <Grid ColumnDefinitions="190,*" ColumnSpacing="8">
+                                        <TextBlock Text="Current Version:" VerticalAlignment="Center" FontWeight="Normal"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding CurrentVersionText}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                    </Grid>
+
+                                    <Grid ColumnDefinitions="190,*" ColumnSpacing="8" IsVisible="{Binding IsUpdateAvailable}">
+                                        <TextBlock Text="Latest Version:" VerticalAlignment="Center" FontWeight="Normal"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding LatestVersionText}" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#10B981"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Classes="section-card" controls:SettingsSearch.IsPanel="True">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Classes="section-title" Text="Status &amp; Actions"/>
+
+                                    <TextBlock Text="{Binding UpdateStatusText}" VerticalAlignment="Center"/>
+
+                                    <ProgressBar Minimum="0" Maximum="100" Value="{Binding UpdateProgress}"
+                                                 IsVisible="{Binding IsUpdating}" Height="8" HorizontalAlignment="Stretch"/>
+
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                                        <Button Classes="compact" Content="Check for Updates" Click="OnCheckForUpdatesClick" IsEnabled="{Binding !IsUpdating}"/>
+                                        <Button Classes="compact" Content="Update Now" Click="OnInstallUpdateClick" IsVisible="{Binding IsUpdateAvailable}" IsEnabled="{Binding !IsUpdating}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+
                     <!-- Paths -->
                     <ScrollViewer controls:SettingsSearch.PageId="paths" IsVisible="{Binding IsPathsPage}" HorizontalContentAlignment="Stretch" HorizontalScrollBarVisibility="Disabled">
                         <StackPanel Margin="28,24,28,32" HorizontalAlignment="Stretch">
