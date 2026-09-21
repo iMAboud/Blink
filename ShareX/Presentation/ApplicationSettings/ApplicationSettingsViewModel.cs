@@ -69,6 +69,7 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
 
     public ObservableCollection<SettingsNavigationItem> NavigationItems { get; private set; } = [];
     public ObservableCollection<ClipboardFormatItem> ClipboardFormats { get; private set; } = [];
+    public ObservableCollection<TrayMenuItemModel> TrayMenuItems { get; private set; } = [];
     public IReadOnlyList<LanguageOption> LanguageOptions { get; } = CreateLanguageOptions();
     public IReadOnlyList<EnumOption<HotkeyType>> HotkeyTypeOptions { get; } = CreateHotkeyTypeOptions();
     public IReadOnlyList<EnumOption<UpdateChannel>> UpdateChannelOptions { get; } = CreateEnumOptions<UpdateChannel>();
@@ -124,6 +125,7 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
     public bool IsHistoryPage => IsPage("history");
     public bool IsPrintPage => IsPage("print");
     public bool IsProxyPage => IsPage("proxy");
+    public bool IsTrayPage => IsPage("tray");
     public bool IsAdvancedPage => IsPage("advanced");
 
     public bool UpdatesVisible => false;
@@ -895,11 +897,58 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
         SelectedClipboardFormat = ClipboardFormats.FirstOrDefault();
 
         RefreshBufferSizeOptions();
+        RefreshTrayMenuItems();
 
         NavigationItems = CreateNavigationItems();
         SelectedNavigationItem = NavigationItems.FirstOrDefault();
 
         OnPropertyChanged(string.Empty);
+    }
+
+    private void RefreshTrayMenuItems()
+    {
+        TrayMenuItems.Clear();
+
+        TrayMenuItems.Add(new TrayMenuItemModel("Settings", Strings.Settings_Settings, LucideIcons.settings, true, isMandatory: true));
+        TrayMenuItems.Add(new TrayMenuItemModel("Exit", Strings.MainMenuBuilder_Exit, LucideIcons.log_out, true, isMandatory: true));
+
+        if (Program.HotkeysConfig?.Hotkeys != null)
+        {
+            foreach (HotkeySettings hotkey in Program.HotkeysConfig.Hotkeys)
+            {
+                if (hotkey.TaskSettings.Job == HotkeyType.None) continue;
+                string id = hotkey.TaskSettings.Job.ToString();
+
+                string title = hotkey.TaskSettings.Job.GetLocalizedDescription();
+                if (hotkey.HotkeyInfo.IsValidHotkey)
+                {
+                    title += $" ({hotkey.HotkeyInfo})";
+                }
+
+                string icon = TaskHelpers.FindMenuLucideIcon(hotkey.TaskSettings.Job);
+                bool isVisible = !Settings.HiddenTrayMenuItems.Contains(id);
+
+                TrayMenuItemModel item = new(id, title, icon, isVisible, isMandatory: false);
+                item.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName == nameof(TrayMenuItemModel.IsVisible))
+                    {
+                        if (!item.IsVisible)
+                        {
+                            if (!Settings.HiddenTrayMenuItems.Contains(item.Id))
+                            {
+                                Settings.HiddenTrayMenuItems.Add(item.Id);
+                            }
+                        }
+                        else
+                        {
+                            Settings.HiddenTrayMenuItems.Remove(item.Id);
+                        }
+                    }
+                };
+                TrayMenuItems.Add(item);
+            }
+        }
     }
 
     private ObservableCollection<SettingsNavigationItem> CreateNavigationItems()
@@ -911,6 +960,7 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
             Nav("paths", Strings.ApplicationSettingsWindow_Paths, LucideIcons.folder),
             Nav("settings", Strings.ApplicationSettingsWindow_Settings, LucideIcons.database_backup),
             Nav("history", Strings.ApplicationSettingsWindow_History, LucideIcons.history),
+            Nav("tray", "System Tray", LucideIcons.panel_bottom),
             Nav("advanced", Strings.ApplicationSettingsWindow_Advanced, LucideIcons.sliders_horizontal)
         ];
     }
@@ -1023,6 +1073,7 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
         OnPropertyChanged(nameof(IsHistoryPage));
         OnPropertyChanged(nameof(IsPrintPage));
         OnPropertyChanged(nameof(IsProxyPage));
+        OnPropertyChanged(nameof(IsTrayPage));
         OnPropertyChanged(nameof(IsAdvancedPage));
     }
 

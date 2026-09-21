@@ -9,7 +9,7 @@
         d:DesignWidth="1000"
         d:DesignHeight="750"
         x:Class="ShareX.SettingsWindow"
-        Title="{x:Static res:Strings.Settings_Settings}"
+        Title="Blink"
         Width="1000"
         Height="750"
         MinWidth="950"

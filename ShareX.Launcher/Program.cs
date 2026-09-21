@@ -55,7 +55,41 @@ static class Program
                     using (stream)
                     using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read))
                     {
-                        archive.ExtractToDirectory(appDir, overwriteFiles: true);
+                        const int BufferSize = 128 * 1024;
+                        byte[] buffer = new byte[BufferSize];
+                        string fullAppDir = Path.GetFullPath(appDir);
+
+                        foreach (ZipArchiveEntry entry in archive.Entries)
+                        {
+                            string fullName = entry.FullName;
+                            if (string.IsNullOrEmpty(entry.Name) && (fullName.EndsWith('/') || fullName.EndsWith('\\')))
+                            {
+                                Directory.CreateDirectory(Path.Combine(appDir, fullName));
+                                continue;
+                            }
+
+                            string destPath = Path.GetFullPath(Path.Combine(appDir, fullName));
+                            if (!destPath.StartsWith(fullAppDir, StringComparison.OrdinalIgnoreCase))
+                            {
+                                continue;
+                            }
+
+                            string? destDir = Path.GetDirectoryName(destPath);
+                            if (!string.IsNullOrEmpty(destDir) && !Directory.Exists(destDir))
+                            {
+                                Directory.CreateDirectory(destDir);
+                            }
+
+                            using (Stream entryStream = entry.Open())
+                            using (FileStream fileStream = new FileStream(destPath, FileMode.Create, FileAccess.Write, FileShare.None, BufferSize))
+                            {
+                                int bytesRead;
+                                while ((bytesRead = entryStream.Read(buffer, 0, buffer.Length)) > 0)
+                                {
+                                    fileStream.Write(buffer, 0, bytesRead);
+                                }
+                            }
+                        }
                     }
                 }
             }

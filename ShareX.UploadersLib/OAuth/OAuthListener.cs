@@ -85,7 +85,23 @@ namespace ShareX.UploadersLib
                 listener.Prefixes.Add(redirectURI);
                 listener.Start();
 
-                HttpListenerContext context = await listener.GetContextAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
+                HttpListenerContext context;
+                while (true)
+                {
+                    context = await listener.GetContextAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
+                    string path = context.Request.Url?.AbsolutePath ?? "";
+                    if (path.Equals("/favicon.ico", StringComparison.OrdinalIgnoreCase) || path.Equals("/favicon.png", StringComparison.OrdinalIgnoreCase))
+                    {
+                        using (HttpListenerResponse favResponse = context.Response)
+                        {
+                            favResponse.StatusCode = (int)HttpStatusCode.NoContent;
+                            favResponse.KeepAlive = false;
+                        }
+                        continue;
+                    }
+                    break;
+                }
+
                 queryCode = context.Request.QueryString.Get("code");
                 queryState = context.Request.QueryString.Get("state");
 

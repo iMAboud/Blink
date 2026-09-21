@@ -726,7 +726,7 @@
   "MainFormPosition": "573, 343",
   "RememberMainFormSize": true,
   "MainFormSize": "860, 525",
-  "TrayLeftClickAction": "RectangleRegion",
+  "TrayLeftClickAction": "OpenSettings",
   "TrayLeftDoubleClickAction": "OpenMainWindow",
   "TrayMiddleClickAction": "ClipboardUploadWithContentViewer",
   "AutoCheckUpdate": false,
