@@ -1,0 +1,80 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="using:ShareX"
+        xmlns:res="using:ShareX.Localization"
+        xmlns:theming="using:ShareX.AvaloniaUI.Theming"
+        mc:Ignorable="d"
+        d:DesignWidth="1000"
+        d:DesignHeight="750"
+        x:Class="ShareX.SettingsWindow"
+        Title="{x:Static res:Strings.Settings_Settings}"
+        Width="1000"
+        Height="750"
+        MinWidth="950"
+        MinHeight="600"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Styles>
+        <Style Selector="Button.settings-tab">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="14,7"/>
+            <Setter Property="Margin" Value="0,4"/>
+            <Setter Property="Foreground" Value="{DynamicResource ShareX.Brush.Text.Secondary}"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.settings-tab:pointerover">
+            <Setter Property="Foreground" Value="{DynamicResource ShareX.Brush.Text}"/>
+            <Setter Property="Background" Value="{DynamicResource ShareX.Brush.Control.Background.Hover}"/>
+        </Style>
+        <Style Selector="Button.settings-tab.active">
+            <Setter Property="Foreground" Value="{DynamicResource ShareX.Brush.Accent}"/>
+            <Setter Property="Background" Value="{DynamicResource ShareX.Brush.Control.Background.Hover}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ShareX.Brush.Border}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+    </Window.Styles>
+
+    <ThemeVariantScope>
+        <Grid Background="{DynamicResource ShareX.Brush.Background.Main}" RowDefinitions="Auto,*">
+            <Border Grid.Row="0"
+                    Background="{DynamicResource ShareX.Brush.Background.Toolbar}"
+                    BorderBrush="{DynamicResource ShareX.Brush.Border}"
+                    BorderThickness="0,0,0,1"
+                    Padding="12,4">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Button x:Name="TabApplication" Classes="settings-tab active" Click="OnApplicationTabClick">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Classes="icon" Text="{x:Static theming:LucideIcons.settings}" FontSize="16" VerticalAlignment="Center"/>
+                            <TextBlock Text="{x:Static res:Strings.Settings_ApplicationSettings}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="TabHotkeys" Classes="settings-tab" Click="OnHotkeysTabClick">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Classes="icon" Text="{x:Static theming:LucideIcons.keyboard}" FontSize="16" VerticalAlignment="Center"/>
+                            <TextBlock Text="{x:Static res:Strings.Settings_HotkeySettings}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="TabTasks" Classes="settings-tab" Click="OnTasksTabClick">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Classes="icon" Text="{x:Static theming:LucideIcons.sliders_horizontal}" FontSize="16" VerticalAlignment="Center"/>
+                            <TextBlock Text="{x:Static res:Strings.Settings_TaskSettings}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <Grid Grid.Row="1">
+                <local:ApplicationSettingsView x:Name="ApplicationSettingsView" IsVisible="True"/>
+                <local:HotkeySettingsView x:Name="HotkeySettingsView" IsVisible="False"/>
+                <local:TaskSettingsView x:Name="TaskSettingsView" IsVisible="False"/>
+            </Grid>
+        </Grid>
+    </ThemeVariantScope>
+</Window>

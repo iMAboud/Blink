@@ -1,0 +1,288 @@
+﻿#region License Information (GPL v3)
+
+/*
+    ShareX - A program that allows you to take screenshots and share any file type
+    Copyright (c) 2007-2026 ShareX Team
+
+    This program is free software; you can redistribute it and/or
+    modify it under the terms of the GNU General Public License
+    as published by the Free Software Foundation; either version 2
+    of the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+    Optionally you can also view the license at <http://www.gnu.org/licenses/>.
+*/
+
+#endregion License Information (GPL v3)
+
+using Newtonsoft.Json;
+using ShareX.HelpersLib;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.IO;
+
+namespace ShareX.UploadersLib.FileUploaders
+{
+    public class BoxFileUploaderService : FileUploaderService
+    {
+        public override FileDestination EnumValue { get; } = FileDestination.Box;
+
+        public override bool CheckConfig(UploadersConfig config)
+        {
+            return OAuth2Info.CheckOAuth(config.BoxOAuth2Info);
+        }
+
+        public override GenericUploader CreateUploader(UploadersConfig config, TaskReferenceHelper taskInfo)
+        {
+            return new Box(config.BoxOAuth2Info)
+            {
+                FolderID = config.BoxSelectedFolder.id,
+                Share = config.BoxShare,
+                ShareAccessLevel = config.BoxShareAccessLevel
+            };
+        }
+    }
+
+    public sealed class Box : FileUploader, IOAuth2
+    {
+        public static BoxFileEntry RootFolder = new BoxFileEntry
+        {
+            type = "folder",
+            id = "0",
+            name = "Root folder"
+        };
+
+        public OAuth2Info AuthInfo { get; set; }
+        public string FolderID { get; set; }
+        public bool Share { get; set; }
+        public BoxShareAccessLevel ShareAccessLevel { get; set; }
+
+        public Box(OAuth2Info oauth)
+        {
+            AuthInfo = oauth;
+            FolderID = "0";
+            Share = true;
+            ShareAccessLevel = BoxShareAccessLevel.Open;
+        }
+
+        public Task<string> GetAuthorizationURLAsync(CancellationToken cancellationToken = default)
+        {
+            Dictionary<string, string> args = new Dictionary<string, string>();
+            args.Add("response_type", "code");
+            args.Add("client_id", AuthInfo.Client_ID);
+
+            return Task.FromResult(URLHelpers.CreateQueryString("https://www.box.com/api/oauth2/authorize", args));
+        }
+
+        public async Task<bool> GetAccessTokenAsync(string pin, CancellationToken cancellationToken = default)
+        {
+            Dictionary<string, string> args = new Dictionary<string, string>();
+            args.Add("grant_type", "authorization_code");
+            args.Add("code", pin);
+            args.Add("client_id", AuthInfo.Client_ID);
+            args.Add("client_secret", AuthInfo.Client_Secret);
+
+            string response = await SendRequestMultiPartAsync("https://www.box.com/api/oauth2/token", args,
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            if (!string.IsNullOrEmpty(response))
+            {
+                OAuth2Token token = JsonConvert.DeserializeObject<OAuth2Token>(response);
+
+                if (token != null && !string.IsNullOrEmpty(token.access_token))
+                {
+                    token.UpdateExpireDate();
+                    AuthInfo.Token = token;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public async Task<bool> RefreshAccessTokenAsync(CancellationToken cancellationToken = default)
+        {
+            if (OAuth2Info.CheckOAuth(AuthInfo) && !string.IsNullOrEmpty(AuthInfo.Token.refresh_token))
+            {
+                Dictionary<string, string> args = new Dictionary<string, string>();
+                args.Add("grant_type", "refresh_token");
+                args.Add("refresh_token", AuthInfo.Token.refresh_token);
+                args.Add("client_id", AuthInfo.Client_ID);
+                args.Add("client_secret", AuthInfo.Client_Secret);
+
+                string response = await SendRequestMultiPartAsync("https://www.box.com/api/oauth2/token", args,
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
+
+                if (!string.IsNullOrEmpty(response))
+                {
+                    OAuth2Token token = JsonConvert.DeserializeObject<OAuth2Token>(response);
+
+                    if (token != null && !string.IsNullOrEmpty(token.access_token))
+                    {
+                        token.UpdateExpireDate();
+                        AuthInfo.Token = token;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private NameValueCollection GetAuthHeaders()
+        {
+            NameValueCollection headers = new NameValueCollection();
+            headers.Add("Authorization", "Bearer " + AuthInfo.Token.access_token);
+            return headers;
+        }
+
+        public async Task<bool> CheckAuthorizationAsync(CancellationToken cancellationToken = default)
+        {
+            if (OAuth2Info.CheckOAuth(AuthInfo))
+            {
+                if (AuthInfo.Token.IsExpired && !await RefreshAccessTokenAsync(cancellationToken).ConfigureAwait(false))
+                {
+                    Errors.Add(Localization.Strings.UploaderErrors_Refresh_access_token_failed);
+                    return false;
+                }
+            }
+            else
+            {
+                Errors.Add(string.Format(Localization.Strings.UploaderErrors_Service_login_is_required, "Box"));
+                return false;
+            }
+
+            return true;
+        }
+
+        public Task<BoxFileInfo> GetFilesAsync(BoxFileEntry folder, CancellationToken cancellationToken = default)
+        {
+            return GetFilesAsync(folder.id, cancellationToken);
+        }
+
+        public async Task<BoxFileInfo> GetFilesAsync(string id, CancellationToken cancellationToken = default)
+        {
+            if (!await CheckAuthorizationAsync(cancellationToken).ConfigureAwait(false))
+            {
+                return null;
+            }
+
+            string url = string.Format("https://api.box.com/2.0/folders/{0}/items", id);
+
+            string response = await SendRequestAsync(HttpMethod.GET, url, headers: GetAuthHeaders(),
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            if (!string.IsNullOrEmpty(response))
+            {
+                return JsonConvert.DeserializeObject<BoxFileInfo>(response);
+            }
+
+            return null;
+        }
+
+        public async Task<string> CreateSharedLinkAsync(string id, BoxShareAccessLevel accessLevel,
+            CancellationToken cancellationToken = default)
+        {
+            string response = await SendRequestAsync(HttpMethod.PUT, "https://api.box.com/2.0/files/" + id,
+                "{\"shared_link\": {\"access\": \"" + accessLevel.ToString().ToLower() + "\"}}", headers: GetAuthHeaders(),
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            if (!string.IsNullOrEmpty(response))
+            {
+                BoxFileEntry fileEntry = JsonConvert.DeserializeObject<BoxFileEntry>(response);
+
+                if (fileEntry != null && fileEntry.shared_link != null)
+                {
+                    return fileEntry.shared_link.url;
+                }
+            }
+
+            return null;
+        }
+
+        protected override async Task<UploadResult> UploadCoreAsync(Stream stream, string fileName, CancellationToken cancellationToken)
+        {
+            if (!await CheckAuthorizationAsync(cancellationToken).ConfigureAwait(false))
+            {
+                return null;
+            }
+
+            if (string.IsNullOrEmpty(FolderID))
+            {
+                FolderID = "0";
+            }
+
+            Dictionary<string, string> args = new Dictionary<string, string>();
+            args.Add("parent_id", FolderID);
+
+            UploadResult result = await SendRequestFileAsync("https://upload.box.com/api/2.0/files/content", stream, fileName, "filename", args,
+                GetAuthHeaders(), cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            if (result.IsSuccess)
+            {
+                BoxFileInfo fileInfo = JsonConvert.DeserializeObject<BoxFileInfo>(result.Response);
+
+                if (fileInfo != null && fileInfo.entries != null && fileInfo.entries.Length > 0)
+                {
+                    BoxFileEntry fileEntry = fileInfo.entries[0];
+
+                    if (Share)
+                    {
+                        AllowReportProgress = false;
+                        result.URL = await CreateSharedLinkAsync(fileEntry.id, ShareAccessLevel, cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        result.URL = string.Format("https://app.box.com/files/0/f/{0}/1/f_{1}", fileEntry.parent.id, fileEntry.id);
+                    }
+                }
+            }
+
+            return result;
+        }
+    }
+
+    public class BoxFileInfo
+    {
+        public BoxFileEntry[] entries { get; set; }
+    }
+
+    public class BoxFileEntry
+    {
+        public string type { get; set; }
+        public string id { get; set; }
+        public string sequence_id { get; set; }
+        public string etag { get; set; }
+        public string name { get; set; }
+        public BoxFileSharedLink shared_link { get; set; }
+        public BoxFileEntry parent { get; set; }
+    }
+
+    public class BoxFileSharedLink
+    {
+        public string url { get; set; }
+    }
+
+    public class BoxFolder
+    {
+        public string ID;
+        public string Name;
+        public string User_id;
+        public string Description;
+        public string Shared;
+        public string Shared_link;
+        public string Permissions;
+
+        //public List<BoxTag> Tags;
+        //public List<BoxFile> Files;
+        public List<BoxFolder> Folders = new List<BoxFolder>();
+    }
+}

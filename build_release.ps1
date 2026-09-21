@@ -1,0 +1,67 @@
+param(
+    [switch]$SingleExe = $true
+)
+
+$ErrorActionPreference = "Stop"
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$rootDir = $PSScriptRoot
+$releaseDir = Join-Path $rootDir "Release"
+$appStagingDir = Join-Path $releaseDir "App"
+$binDir = Join-Path $rootDir "ShareX\bin\Release\win-x64"
+
+Write-Host "Building Blink in Release mode..." -ForegroundColor Cyan
+dotnet build (Join-Path $rootDir "ShareX.sln") -c Release -p:Platform=x64
+if ($LASTEXITCODE -ne 0) {
+    throw "Build failed."
+}
+
+Write-Host "Staging debloated release files..." -ForegroundColor Cyan
+if (Test-Path $releaseDir) {
+    Remove-Item $releaseDir -Recurse -Force
+}
+New-Item -ItemType Directory -Path $appStagingDir -Force | Out-Null
+
+Get-ChildItem -Path $binDir -Recurse -File | Where-Object { $_.Extension -ne ".pdb" } | ForEach-Object {
+    $relPath = $_.FullName.Substring($binDir.Length + 1)
+    $destPath = Join-Path $appStagingDir $relPath
+    $destSubDir = Split-Path $destPath -Parent
+    if (!(Test-Path $destSubDir)) {
+        New-Item -ItemType Directory -Path $destSubDir -Force | Out-Null
+    }
+    Copy-Item $_.FullName -Destination $destPath -Force
+}
+
+$payloadZip = Join-Path $rootDir "ShareX.Launcher\Blink_Payload.zip"
+Write-Host "Creating compressed payload archive at $payloadZip..." -ForegroundColor Cyan
+if (Test-Path $payloadZip) {
+    Remove-Item $payloadZip -Force
+}
+
+[System.IO.Compression.ZipFile]::CreateFromDirectory($appStagingDir, $payloadZip, [System.IO.Compression.CompressionLevel]::Optimal, $false)
+$zipSize = (Get-Item $payloadZip).Length / 1MB
+Write-Host ("Payload archive created. Size: {0:N2} MB" -f $zipSize) -ForegroundColor Green
+
+Write-Host "Building Blink single-executable launcher..." -ForegroundColor Cyan
+dotnet publish (Join-Path $rootDir "ShareX.Launcher\ShareX.Launcher.csproj") -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o (Join-Path $rootDir "ShareX.Launcher\publish")
+if ($LASTEXITCODE -ne 0) {
+    throw "Launcher publish failed."
+}
+
+$launcherBuilt = Join-Path $rootDir "ShareX.Launcher\publish\Blink.exe"
+$distSingleExe = Join-Path $releaseDir "Blink.exe"
+Copy-Item $launcherBuilt -Destination $distSingleExe -Force
+Copy-Item $launcherBuilt -Destination (Join-Path $rootDir "Blink.exe") -Force
+
+# Ensure no legacy ShareX.exe remains
+Remove-Item (Join-Path $releaseDir "ShareX.exe") -Force -ErrorAction SilentlyContinue
+Remove-Item (Join-Path $rootDir "ShareX.exe") -Force -ErrorAction SilentlyContinue
+
+# Clean staging App directory so Release directory only has the single Blink.exe
+Remove-Item $appStagingDir -Recurse -Force
+
+$singleExeSize = (Get-Item $distSingleExe).Length / 1MB
+Write-Host "==================================================" -ForegroundColor Green
+Write-Host ("Production single-executable ready at: {0}" -f $distSingleExe) -ForegroundColor Green
+Write-Host ("Single Blink.exe size: {0:N2} MB" -f $singleExeSize) -ForegroundColor Green
+Write-Host ("Root launcher ready at: {0}" -f (Join-Path $rootDir "Blink.exe")) -ForegroundColor Green
+Write-Host "==================================================" -ForegroundColor Green
