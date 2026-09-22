@@ -15,19 +15,36 @@ if (Test-Path $releaseDir) {
 }
 New-Item -ItemType Directory -Path $appStagingDir -Force | Out-Null
 
-dotnet publish (Join-Path $rootDir "ShareX\ShareX.csproj") -c Release -r win-x64 --self-contained false -p:EnableWindowsTargeting=true -o $appStagingDir
+dotnet publish (Join-Path $rootDir "ShareX\ShareX.csproj") -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -p:DebugSymbols=false -p:EnableWindowsTargeting=true -o $appStagingDir
 if ($LASTEXITCODE -ne 0) {
     throw "ShareX publish failed."
 }
 
 Write-Host "Publishing Blink Updater..." -ForegroundColor Cyan
-dotnet publish (Join-Path $rootDir "ShareX.Updater\ShareX.Updater.csproj") -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:EnableWindowsTargeting=true -o $appStagingDir
+dotnet publish (Join-Path $rootDir "ShareX.Updater\ShareX.Updater.csproj") -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:DebugType=none -p:DebugSymbols=false -p:EnableWindowsTargeting=true -o $appStagingDir
 if ($LASTEXITCODE -ne 0) {
     throw "Updater publish failed."
 }
 
 # Clean PDB and XML files from staging
 Get-ChildItem -Path $appStagingDir -Recurse -File | Where-Object { $_.Extension -eq ".pdb" -or $_.Extension -eq ".xml" } | Remove-Item -Force
+
+Write-Host "Generating file SHA-256 manifest for differential updates..." -ForegroundColor Cyan
+$manifestPath = Join-Path $appStagingDir "manifest.json"
+$files = Get-ChildItem -Path $appStagingDir -Recurse -File | Where-Object { $_.Name -ne "manifest.json" }
+$manifestData = @{}
+
+foreach ($f in $files) {
+    $relPath = $f.FullName.Substring($appStagingDir.Length + 1).Replace("\", "/")
+    $hash = (Get-FileHash -Path $f.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+    $manifestData[$relPath] = @{
+        "hash" = $hash
+        "size" = $f.Length
+    }
+}
+
+$manifestJson = $manifestData | ConvertTo-Json -Depth 5
+Set-Content -Path $manifestPath -Value $manifestJson -Encoding UTF8
 
 $payloadZip = Join-Path $rootDir "ShareX.Launcher\Blink_Payload.zip"
 Write-Host "Creating compressed payload archive at $payloadZip..." -ForegroundColor Cyan
@@ -40,7 +57,7 @@ $zipSize = (Get-Item $payloadZip).Length / 1MB
 Write-Host ("Payload archive created. Size: {0:N2} MB" -f $zipSize) -ForegroundColor Green
 
 Write-Host "Building Blink single-executable launcher..." -ForegroundColor Cyan
-dotnet publish (Join-Path $rootDir "ShareX.Launcher\ShareX.Launcher.csproj") -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o (Join-Path $rootDir "ShareX.Launcher\publish")
+dotnet publish (Join-Path $rootDir "ShareX.Launcher\ShareX.Launcher.csproj") -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -p:DebugSymbols=false -p:EnableWindowsTargeting=true -o (Join-Path $rootDir "ShareX.Launcher\publish")
 if ($LASTEXITCODE -ne 0) {
     throw "Launcher publish failed."
 }
