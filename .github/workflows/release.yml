@@ -29,37 +29,35 @@ jobs:
         id: versioning
         shell: pwsh
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $maxMajor = 1
-          $maxMinor = 0
+          $repo = "${{ github.repository }}"
+          $url = "https://api.github.com/repos/$repo/releases/latest"
+          $headers = @{ "User-Agent" = "GitHub-Action" }
+          if ($env:GITHUB_TOKEN) { $headers["Authorization"] = "Bearer $env:GITHUB_TOKEN" }
 
-          # Get existing tags from git and gh release list
-          $gitTags = git tag -l
-          $ghReleases = try { gh release list --limit 100 | ForEach-Object { ($_ -split '\s+')[0] } } catch { @() }
-          $allTags = ($gitTags + $ghReleases) | Where-Object { $_ -match '^\s*v?\d+\.\d+' }
-
-          foreach ($tag in $allTags) {
-              $cleanTag = $tag.Trim().TrimStart('v', 'V')
-              if ($cleanTag -match '^(\d+)\.(\d+)') {
-                  $maj = [int]$Matches[1]
-                  $min = [int]$Matches[2]
-                  if ($maj -gt $maxMajor) {
-                      $maxMajor = $maj
-                      $maxMinor = $min
-                  } elseif ($maj -eq $maxMajor -and $min -gt $maxMinor) {
-                      $maxMinor = $min
-                  }
+          $latestTag = "1.0"
+          try {
+              $response = Invoke-RestMethod -Uri $url -Headers $headers -ErrorAction Stop
+              if ($response.tag_name) {
+                  $latestTag = $response.tag_name.TrimStart('v', 'V')
               }
+          } catch {
+              Write-Host "No previous release found or error fetching latest release. Baseline version 1.0 will be used."
           }
 
-          $newMinor = $maxMinor + 1
-          $newVersion = "$maxMajor.$newMinor"
-          $fullVersion = "$maxMajor.$newMinor.0"
+          $major = 1
+          $minor = 0
+          if ($latestTag -match '^\d+\.\d+') {
+              $parts = $latestTag.Split('.')
+              $major = [int]$parts[0]
+              $minor = [int]$parts[1] + 1
+          }
+          $newVersion = "$major.$minor"
+          $fullVersion = "$major.$minor.0"
 
-          Write-Host "Highest existing tag/release found: $maxMajor.$maxMinor"
+          Write-Host "Latest Release Tag: $latestTag"
           Write-Host "New Release Tag: $newVersion"
-          Write-Host "Full Version: $fullVersion"
 
           echo "NEW_VERSION=$newVersion" >> $env:GITHUB_ENV
           echo "FULL_VERSION=$fullVersion" >> $env:GITHUB_ENV
@@ -72,11 +70,11 @@ jobs:
       - name: Build Single-Executable Release
         shell: pwsh
         run: |
-          .\build_release.ps1 -Version "$env:FULL_VERSION"
+          .\build_release.ps1
 
       - name: Create GitHub Release
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "$env:NEW_VERSION" Release/Blink.exe --title "Blink v$env:NEW_VERSION" --notes "Automated release $env:NEW_VERSION" --clobber
+          gh release create "$env:NEW_VERSION" Release/Blink.exe --title "Blink v$env:NEW_VERSION" --notes "Automated release $env:NEW_VERSION"
