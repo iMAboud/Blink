@@ -3,6 +3,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -18,6 +19,7 @@ static class Program
             int pid = 0;
             string? newExe = null;
             string? targetExe = null;
+            string? updateDir = null;
             bool launch = false;
 
             for (int i = 0; i < args.Length; i++)
@@ -35,13 +37,17 @@ static class Program
                 {
                     targetExe = args[++i];
                 }
+                else if (arg.Equals("--update-dir", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    updateDir = args[++i];
+                }
                 else if (arg.Equals("--launch", StringComparison.OrdinalIgnoreCase))
                 {
                     launch = true;
                 }
             }
 
-            if (string.IsNullOrEmpty(newExe) || string.IsNullOrEmpty(targetExe) || !File.Exists(newExe))
+            if (string.IsNullOrEmpty(targetExe))
             {
                 return;
             }
@@ -95,60 +101,81 @@ static class Program
 
             Thread.Sleep(1000);
 
-            // Retry copy loop for target exe
-            bool copied = false;
-            for (int attempt = 0; attempt < 10; attempt++)
-            {
-                try
-                {
-                    File.Copy(newExe, targetExe, true);
-                    copied = true;
-                    break;
-                }
-                catch
-                {
-                    Thread.Sleep(500);
-                }
-            }
-
-            if (!copied)
-            {
-                MessageBox.Show("Failed to apply update file. Please make sure Blink is closed.", "Blink Updater",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // Delete App staging directory so new single-file launcher extracts fresh payload
             string? targetDir = Path.GetDirectoryName(targetExe);
-            if (!string.IsNullOrEmpty(targetDir))
+            string appDir = !string.IsNullOrEmpty(targetDir) ? Path.Combine(targetDir, "App") : string.Empty;
+
+            // Differential update: If an update directory with new files is supplied, compare SHA-256 hashes and update only changed files
+            if (!string.IsNullOrEmpty(updateDir) && Directory.Exists(updateDir) && !string.IsNullOrEmpty(appDir))
             {
-                string appDir = Path.Combine(targetDir, "App");
-                if (Directory.Exists(appDir))
+                Directory.CreateDirectory(appDir);
+                string[] newFiles = Directory.GetFiles(updateDir, "*", SearchOption.AllDirectories);
+
+                foreach (string srcFile in newFiles)
                 {
+                    string relPath = Path.GetRelativePath(updateDir, srcFile);
+                    string destFile = Path.Combine(appDir, relPath);
+                    string? destFolder = Path.GetDirectoryName(destFile);
+
+                    if (!string.IsNullOrEmpty(destFolder) && !Directory.Exists(destFolder))
+                    {
+                        Directory.CreateDirectory(destFolder);
+                    }
+
+                    if (File.Exists(destFile))
+                    {
+                        string srcHash = GetFileHash(srcFile);
+                        string destHash = GetFileHash(destFile);
+                        if (srcHash.Equals(destHash, StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue; // Skip identical file - differential update optimization!
+                        }
+                    }
+
                     for (int attempt = 0; attempt < 5; attempt++)
                     {
                         try
                         {
-                            Directory.Delete(appDir, true);
+                            File.Copy(srcFile, destFile, true);
                             break;
                         }
                         catch
                         {
-                            Thread.Sleep(500);
+                            Thread.Sleep(300);
                         }
                     }
                 }
+
+                // Cleanup update staging directory
+                try { Directory.Delete(updateDir, true); } catch { }
             }
 
-            // Cleanup downloaded file
-            try
+            // Copy single executable if provided
+            if (!string.IsNullOrEmpty(newExe) && File.Exists(newExe))
             {
-                if (File.Exists(newExe))
+                bool copied = false;
+                for (int attempt = 0; attempt < 10; attempt++)
                 {
-                    File.Delete(newExe);
+                    try
+                    {
+                        File.Copy(newExe, targetExe, true);
+                        copied = true;
+                        break;
+                    }
+                    catch
+                    {
+                        Thread.Sleep(500);
+                    }
                 }
+
+                if (!copied)
+                {
+                    MessageBox.Show("Failed to apply update file. Please make sure Blink is closed.", "Blink Updater",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                try { File.Delete(newExe); } catch { }
             }
-            catch { }
 
             // Relaunch app
             if (launch && File.Exists(targetExe))
@@ -166,6 +193,21 @@ static class Program
         {
             MessageBox.Show("Updater encountered an error: " + ex.Message, "Blink Updater",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private static string GetFileHash(string filepath)
+    {
+        try
+        {
+            using SHA256 sha = SHA256.Create();
+            using FileStream stream = File.OpenRead(filepath);
+            byte[] hash = sha.ComputeHash(stream);
+            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+        }
+        catch
+        {
+            return string.Empty;
         }
     }
 }

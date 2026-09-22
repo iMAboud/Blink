@@ -29,6 +29,23 @@ if ($LASTEXITCODE -ne 0) {
 # Clean PDB and XML files from staging
 Get-ChildItem -Path $appStagingDir -Recurse -File | Where-Object { $_.Extension -eq ".pdb" -or $_.Extension -eq ".xml" } | Remove-Item -Force
 
+Write-Host "Generating file SHA-256 manifest for differential updates..." -ForegroundColor Cyan
+$manifestPath = Join-Path $appStagingDir "manifest.json"
+$files = Get-ChildItem -Path $appStagingDir -Recurse -File | Where-Object { $_.Name -ne "manifest.json" }
+$manifestData = @{}
+
+foreach ($f in $files) {
+    $relPath = $f.FullName.Substring($appStagingDir.Length + 1).Replace("\", "/")
+    $hash = (Get-FileHash -Path $f.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+    $manifestData[$relPath] = @{
+        "hash" = $hash
+        "size" = $f.Length
+    }
+}
+
+$manifestJson = $manifestData | ConvertTo-Json -Depth 5
+Set-Content -Path $manifestPath -Value $manifestJson -Encoding UTF8
+
 $payloadZip = Join-Path $rootDir "ShareX.Launcher\Blink_Payload.zip"
 Write-Host "Creating compressed payload archive at $payloadZip..." -ForegroundColor Cyan
 if (Test-Path $payloadZip) {
