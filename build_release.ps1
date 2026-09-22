@@ -15,13 +15,13 @@ if (Test-Path $releaseDir) {
 }
 New-Item -ItemType Directory -Path $appStagingDir -Force | Out-Null
 
-dotnet publish (Join-Path $rootDir "ShareX\ShareX.csproj") -c Release -r win-x64 --self-contained false -p:EnableWindowsTargeting=true -o $appStagingDir
+dotnet publish (Join-Path $rootDir "ShareX\ShareX.csproj") -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -p:DebugSymbols=false -p:EnableWindowsTargeting=true -o $appStagingDir
 if ($LASTEXITCODE -ne 0) {
     throw "ShareX publish failed."
 }
 
 Write-Host "Publishing Blink Updater..." -ForegroundColor Cyan
-dotnet publish (Join-Path $rootDir "ShareX.Updater\ShareX.Updater.csproj") -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:EnableWindowsTargeting=true -o $appStagingDir
+dotnet publish (Join-Path $rootDir "ShareX.Updater\ShareX.Updater.csproj") -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:DebugType=none -p:DebugSymbols=false -p:EnableWindowsTargeting=true -o $appStagingDir
 if ($LASTEXITCODE -ne 0) {
     throw "Updater publish failed."
 }
@@ -40,7 +40,7 @@ $zipSize = (Get-Item $payloadZip).Length / 1MB
 Write-Host ("Payload archive created. Size: {0:N2} MB" -f $zipSize) -ForegroundColor Green
 
 Write-Host "Building Blink single-executable launcher..." -ForegroundColor Cyan
-dotnet publish (Join-Path $rootDir "ShareX.Launcher\ShareX.Launcher.csproj") -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o (Join-Path $rootDir "ShareX.Launcher\publish")
+dotnet publish (Join-Path $rootDir "ShareX.Launcher\ShareX.Launcher.csproj") -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -p:DebugSymbols=false -p:EnableWindowsTargeting=true -o (Join-Path $rootDir "ShareX.Launcher\publish")
 if ($LASTEXITCODE -ne 0) {
     throw "Launcher publish failed."
 }

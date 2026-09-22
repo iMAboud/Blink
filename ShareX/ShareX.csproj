@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <OutputType>WinExe</OutputType>
     <ApplicationIcon>Blink.ico</ApplicationIcon>
     <UseWindowsForms>true</UseWindowsForms>
@@ -10,7 +10,6 @@
     <Title>Blink</Title>
     <Company>Blink Team</Company>
     <Description>Blink - Screen capture and productivity tool</Description>
-    <SupportedOSPlatformVersion>10.0.22621.0</SupportedOSPlatformVersion>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <ForceDesignerDpiUnaware>true</ForceDesignerDpiUnaware>
     <ApplicationVisualStyles>true</ApplicationVisualStyles>
