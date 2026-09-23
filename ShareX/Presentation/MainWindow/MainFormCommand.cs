@@ -17,8 +17,6 @@ internal enum MainFormCommand
     DestinationSettings,
     CustomUploaderSettings,
     ScreenshotsFolder,
-    History,
-    ImageHistory,
     DebugLog,
     TestImageUpload,
     TestTextUpload,

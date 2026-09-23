@@ -58,7 +58,6 @@ public sealed class ToolbarCustomizationItemViewModel : ViewModelBase
         CreateToolDefinition(EditorTool.SpeechBalloon, Strings.ToolbarCustomizationItemViewModel_SpeechBalloon, EditorIcons.ToolSpeechBalloon, "O"),
         CreateToolDefinition(EditorTool.Step, Strings.ToolbarCustomizationItemViewModel_Step, EditorIcons.ToolStep, "N"),
         CreateToolDefinition(EditorTool.Image, Strings.ToolbarCustomizationItemViewModel_Image, EditorIcons.ToolImage, "I"),
-        CreateToolDefinition(EditorTool.Emoji, Strings.ToolbarCustomizationItemViewModel_Emoji, EditorIcons.ToolEmoji, "J"),
         CreateToolDefinition(EditorTool.Cursor, Strings.ToolbarCustomizationItemViewModel_Cursor, EditorIcons.ToolCursor, "K"),
         CreateToolDefinition(EditorTool.Highlight, Strings.ToolbarCustomizationItemViewModel_Highlight, EditorIcons.ToolHighlight, "H"),
         CreateToolDefinition(EditorTool.SmartEraser, Strings.ToolbarCustomizationItemViewModel_SmartEraser, EditorIcons.ToolSmartEraser, "W"),

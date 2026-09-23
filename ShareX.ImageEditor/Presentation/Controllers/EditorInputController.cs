@@ -117,7 +117,7 @@ public class EditorInputController
     private static double FromOverlayCoordinate(double value) => value - EditorView.OverlayCanvasBleed;
     private static Point ToOverlayPoint(Point value) => new(ToOverlayCoordinate(value.X), ToOverlayCoordinate(value.Y));
     private static bool ShouldClearSelectionOnMouseDrawStart(EditorTool tool)
-        => tool != EditorTool.Select && tool != EditorTool.Image && tool != EditorTool.Emoji;
+        => tool != EditorTool.Select && tool != EditorTool.Image;
 
     private static Rect GetCropOverlayCanvasRect(global::Avalonia.Controls.Shapes.Rectangle cropOverlay)
         => new(

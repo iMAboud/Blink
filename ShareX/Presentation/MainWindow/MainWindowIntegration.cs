@@ -152,12 +152,6 @@ public static class MainWindowIntegration
             case MainFormCommand.ScreenshotsFolder:
                 TaskHelpers.OpenScreenshotsFolder();
                 break;
-            case MainFormCommand.History:
-                TaskHelpers.OpenHistory();
-                break;
-            case MainFormCommand.ImageHistory:
-                TaskHelpers.OpenImageHistory();
-                break;
             case MainFormCommand.DebugLog:
                 TaskHelpers.OpenDebugLog();
                 break;

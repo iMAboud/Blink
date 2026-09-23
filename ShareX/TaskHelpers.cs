@@ -386,12 +386,6 @@ namespace ShareX
                 case HotkeyType.OpenScreenshotsFolder:
                     OpenScreenshotsFolder();
                     break;
-                case HotkeyType.OpenHistory:
-                    OpenHistory();
-                    break;
-                case HotkeyType.OpenImageHistory:
-                    OpenImageHistory();
-                    break;
                 case HotkeyType.ToggleActionsToolbar:
                     ToggleActionsToolbar();
                     break;
@@ -801,13 +795,7 @@ namespace ShareX
             }
         }
 
-        public static void OpenHistory()
-        {
-        }
 
-        public static void OpenImageHistory()
-        {
-        }
 
         public static void OpenDebugLog()
         {
@@ -2192,8 +2180,6 @@ namespace ShareX
                 HotkeyType.OpenSettings => LucideIcons.settings,
                 HotkeyType.OpenMainWindow => LucideIcons.panel_top_open,
                 HotkeyType.OpenScreenshotsFolder => LucideIcons.folder_open,
-                HotkeyType.OpenHistory => LucideIcons.history,
-                HotkeyType.OpenImageHistory => LucideIcons.images,
                 HotkeyType.ToggleActionsToolbar => LucideIcons.panel_top,
                 HotkeyType.ToggleTrayMenu => LucideIcons.menu,
                 HotkeyType.ExitBlink => LucideIcons.log_out,

@@ -58,7 +58,6 @@ public partial class EditorSelectionController
     private Point _startPoint; // Used for resizing deltas
     private bool _isDraggingShape;
     private global::Avalonia.Controls.Shapes.Line? _rotationLine; // Dotted line connecting top-center to rotation handle
-    private bool _pendingEmojiExactRender;
 
     // Reactive bounds tracking for text annotations
     private Control? _observedShape;
@@ -97,7 +96,6 @@ public partial class EditorSelectionController
         _isDraggingHandle = false;
         _draggedHandle = null;
         _isDraggingShape = false;
-        _pendingEmojiExactRender = false;
         UpdateBoundsObserver(); // Clear observer
         ClearHoverOutline();
         UpdateSelectionHandles();
@@ -339,10 +337,7 @@ public partial class EditorSelectionController
             case SpeechBalloonControl balloon:
                 ShowSpeechBalloonTextEditor(balloon);
                 return true;
-            case global::Avalonia.Controls.Image emojiControl when emojiControl.Tag is EmojiAnnotation emojiAnnotation:
-                ShowEmojiPickerForReplacement(emojiControl, emojiAnnotation);
-                return true;
-            case global::Avalonia.Controls.Image imageControl when imageControl.Tag is ImageAnnotation imageAnnotation && imageAnnotation is not EmojiAnnotation && imageAnnotation is not CursorAnnotation:
+            case global::Avalonia.Controls.Image imageControl when imageControl.Tag is ImageAnnotation imageAnnotation && imageAnnotation is not CursorAnnotation:
                 ShowImagePickerForReplacement(imageControl, imageAnnotation);
                 return true;
             default:
@@ -350,34 +345,6 @@ public partial class EditorSelectionController
         }
     }
 
-    private void ShowEmojiPickerForReplacement(global::Avalonia.Controls.Image emojiControl, EmojiAnnotation emojiAnnotation)
-    {
-        if (_view.DataContext is not MainViewModel vm)
-        {
-            return;
-        }
-
-        _selectedShape = emojiControl;
-        UpdateBoundsObserver();
-        UpdateSelectionHandles();
-        SelectionChanged?.Invoke(true);
-
-        vm.ShowEmojiPickerDialog(entry =>
-        {
-            emojiAnnotation.UnicodeSequence = entry.Unicode;
-            emojiAnnotation.DisplayName = entry.DisplayName;
-            emojiAnnotation.ClearImage();
-
-            AnnotationVisualFactory.UpdateVisualControl(emojiControl, emojiAnnotation);
-            UpdateSelectionHandles();
-
-            if (_view.DataContext is MainViewModel activeVm)
-            {
-                activeVm.HasAnnotations = true;
-                activeVm.IsDirty = true;
-            }
-        });
-    }
 
     private async void ShowImagePickerForReplacement(global::Avalonia.Controls.Image imageControl, ImageAnnotation imageAnnotation)
     {
@@ -474,7 +441,6 @@ public partial class EditorSelectionController
 
         if (_isDraggingHandle)
         {
-            FinalizeEmojiInteractiveRender();
             _isDraggingHandle = false;
             _draggedHandle = null;
             UpdateCanvasCursorForSelectionInteraction();
@@ -490,8 +456,7 @@ public partial class EditorSelectionController
 
         if (_isDraggingShape)
         {
-            _pendingEmojiExactRender = false;
-            _isDraggingShape = false;
+                _isDraggingShape = false;
             UpdateCanvasCursorForSelectionInteraction();
             RefreshSelectionHandleCursors();
             e.Pointer.Capture(null);
@@ -596,7 +561,6 @@ public partial class EditorSelectionController
 
         if (TryGetRotatableAnnotation(_selectedShape, out Annotation? resizableRotatedAnnotation)
             && resizableRotatedAnnotation is not null
-            && resizableRotatedAnnotation is not EmojiAnnotation
             && resizableRotatedAnnotation.RotationAngle != 0
             && TryResizeRotatedAnnotation(resizableRotatedAnnotation, currentPoint, handleTag))
         {
@@ -611,13 +575,6 @@ public partial class EditorSelectionController
             return;
         }
 
-        if (_selectedShape.Tag is EmojiAnnotation emojiAnnotation)
-        {
-            ResizeEmojiAnnotation(emojiAnnotation, currentPoint, handleTag);
-            _startPoint = currentPoint;
-            UpdateSelectionHandles();
-            return;
-        }
 
         // Regular shapes
         var shapeRect = GetLogicalRect(_selectedShape);
@@ -704,32 +661,6 @@ public partial class EditorSelectionController
         }
     }
 
-    private void ResizeEmojiAnnotation(EmojiAnnotation annotation, Point currentPoint, string handleTag)
-    {
-        if (_selectedShape is not global::Avalonia.Controls.Image imageControl)
-        {
-            return;
-        }
-
-        const double minSize = 16;
-
-        if (!TryGetRotatedSquareResizeBounds(annotation, currentPoint, handleTag, minSize, out Rect resizedBounds))
-        {
-            return;
-        }
-
-        annotation.StartPoint = new SKPoint((float)resizedBounds.Left, (float)resizedBounds.Top);
-        annotation.EndPoint = new SKPoint((float)resizedBounds.Right, (float)resizedBounds.Bottom);
-        _pendingEmojiExactRender = true;
-
-        AnnotationVisualFactory.UpdateVisualControl(
-            imageControl,
-            annotation,
-            AnnotationVisualMode.Persisted,
-            _view.EditorCore.CanvasSize.Width,
-            _view.EditorCore.CanvasSize.Height,
-            useInteractiveEmojiRender: true);
-    }
 
     private bool TryGetRotatedSquareResizeBounds(Annotation annotation, Point currentPoint, string handleTag, double minSize, out Rect resizedBounds)
     {
@@ -1141,27 +1072,6 @@ public partial class EditorSelectionController
         UpdateHoverOutline();
     }
 
-    private void FinalizeEmojiInteractiveRender()
-    {
-        if (!_pendingEmojiExactRender)
-        {
-            return;
-        }
-
-        _pendingEmojiExactRender = false;
-
-        if (_selectedShape is not global::Avalonia.Controls.Image imageControl || imageControl.Tag is not EmojiAnnotation emojiAnnotation)
-        {
-            return;
-        }
-
-        AnnotationVisualFactory.UpdateVisualControl(
-            imageControl,
-            emojiAnnotation,
-            AnnotationVisualMode.Persisted,
-            _view.EditorCore.CanvasSize.Width,
-            _view.EditorCore.CanvasSize.Height);
-    }
 
     private bool TryCreateRotatableSelectionHandles(Control shape, Canvas overlay)
     {
@@ -1258,9 +1168,6 @@ public partial class EditorSelectionController
                 return true;
             case OutlinedTextControl { Tag: TextAnnotation textAnnotation }:
                 annotation = textAnnotation;
-                return true;
-            case global::Avalonia.Controls.Image { Tag: EmojiAnnotation emojiAnnotation }:
-                annotation = emojiAnnotation;
                 return true;
             case global::Avalonia.Controls.Image { Tag: CursorAnnotation }:
                 annotation = null;

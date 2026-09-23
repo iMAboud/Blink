@@ -79,8 +79,7 @@ public static class AnnotationVisualFactory
         Annotation annotation,
         AnnotationVisualMode mode = AnnotationVisualMode.Persisted,
         double canvasWidth = 0,
-        double canvasHeight = 0,
-        bool useInteractiveEmojiRender = false)
+        double canvasHeight = 0)
     {
         ArgumentNullException.ThrowIfNull(control);
         ArgumentNullException.ThrowIfNull(annotation);
@@ -145,9 +144,6 @@ public static class AnnotationVisualFactory
                 cursorAnnotation.UpdateVisual(cursorControl);
                 break;
 
-            case EmojiAnnotation emojiAnnotation when control is Image emojiControl:
-                emojiAnnotation.UpdateVisual(emojiControl, useInteractiveEmojiRender);
-                break;
 
             case ImageAnnotation imageAnnotation when control is Image imageControl:
                 imageAnnotation.UpdateVisual(imageControl);
@@ -178,7 +174,6 @@ public static class AnnotationVisualFactory
             SpotlightAnnotation spotlight => spotlight.CreateVisual(),
             FreehandAnnotation freehand => freehand.CreateVisual(),
             CursorAnnotation cursor => cursor.CreateVisual(),
-            EmojiAnnotation emoji => emoji.CreateVisual(),
             ImageAnnotation image => image.CreateVisual(),
             _ => null
         };

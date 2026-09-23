@@ -49,7 +49,6 @@ namespace ShareX.ImageEditor.Presentation.Views
             vm.ZoomToFitRequested += OnZoomToFitRequested;
             vm.FlattenRequested += OnFlattenRequested;
             vm.ImageInsertionRequested += OnImageInsertionRequested;
-            vm.EmojiInsertionRequested += OnEmojiInsertionRequested;
             vm.NewImageRequested += OnNewImageRequested;
             vm.OpenImageRequested += OnOpenImageRequested;
             vm.StartScreenRequested += OnStartScreenRequested;
@@ -81,7 +80,6 @@ namespace ShareX.ImageEditor.Presentation.Views
             vm.ZoomToFitRequested -= OnZoomToFitRequested;
             vm.FlattenRequested -= OnFlattenRequested;
             vm.ImageInsertionRequested -= OnImageInsertionRequested;
-            vm.EmojiInsertionRequested -= OnEmojiInsertionRequested;
             vm.NewImageRequested -= OnNewImageRequested;
             vm.OpenImageRequested -= OnOpenImageRequested;
             vm.StartScreenRequested -= OnStartScreenRequested;

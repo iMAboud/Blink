@@ -40,7 +40,6 @@ using ShareX.ImageEditor.Integration;
 using ShareX.ImageEditor.Localization;
 using ShareX.ImageEditor.Presentation.Controllers;
 using ShareX.ImageEditor.Presentation.Controls;
-using ShareX.ImageEditor.Presentation.Emoji;
 using ShareX.ImageEditor.Presentation.Rendering;
 using ShareX.ImageEditor.Presentation.ViewModels;
 using SkiaSharp;
@@ -104,7 +103,6 @@ namespace ShareX.ImageEditor.Presentation.Views
             _zoomController = new EditorZoomController(this);
             _selectionController = new EditorSelectionController(this);
             _inputController = new EditorInputController(this, _selectionController, _zoomController);
-            InitializeEasterEggs();
 
             // Subscribe to selection controller events
             _selectionController.RequestUpdateEffect += OnRequestUpdateEffect;
@@ -552,7 +550,6 @@ namespace ShareX.ImageEditor.Presentation.Views
             DetachViewModel();
 
             UnhookAnnotationToolbarEvents();
-            StopEasterEggs();
             ClearEffectPreviewCache();
         }
 
@@ -650,8 +647,7 @@ namespace ShareX.ImageEditor.Presentation.Views
                         EnsureEffectBrowserPanel(vm).FocusSearchBox();
                     }
                 }
-                else if (e.PropertyName == nameof(MainViewModel.ModalContent) &&
-                    vm.ModalContent is EmojiPickerDialogViewModel)
+                else if (e.PropertyName == nameof(MainViewModel.ModalContent) && vm.ModalContent != null)
                 {
                     PositionModalOnCursorScreen();
                 }
@@ -1055,7 +1051,6 @@ namespace ShareX.ImageEditor.Presentation.Views
             DetachParentWindow();
             DetachViewModel();
             UnhookAnnotationToolbarEvents();
-            StopEasterEggs();
             _selectionController.RequestUpdateEffect -= OnRequestUpdateEffect;
             ClearEffectPreviewCache();
             this.FindControl<SpotlightOverlayControl>("SpotlightOverlayControl")?.Dispose();
@@ -1311,7 +1306,6 @@ namespace ShareX.ImageEditor.Presentation.Views
             // Skip shortcuts when a modal dialog is open (e.g. emoji picker search box)
             if (DataContext is MainViewModel { IsModalOpen: true }) return;
 
-            if (HandleEasterEggKeyDown(e)) return;
 
             if (e.KeyModifiers.HasFlag(KeyModifiers.Control) && !_inputController.IsDrawingActive)
             {
@@ -1694,46 +1688,6 @@ namespace ShareX.ImageEditor.Presentation.Views
             }
         }
 
-        private void InsertEmojiAnnotation(string unicodeSequence, string displayName, Point? dropPosition = null)
-        {
-            var canvas = this.FindControl<Canvas>("AnnotationCanvas");
-            if (canvas == null || DataContext is not MainViewModel vm)
-            {
-                return;
-            }
-
-            const int defaultSize = 160;
-
-            Point? screenCenter = dropPosition.HasValue ? null : GetCursorScreenCenter(canvas);
-            double centerX = screenCenter.HasValue
-                ? Math.Clamp(screenCenter.Value.X, 0, _editorCore.CanvasSize.Width)
-                : _editorCore.CanvasSize.Width / 2;
-            double centerY = screenCenter.HasValue
-                ? Math.Clamp(screenCenter.Value.Y, 0, _editorCore.CanvasSize.Height)
-                : _editorCore.CanvasSize.Height / 2;
-            var posX = dropPosition?.X ?? centerX - defaultSize / 2.0;
-            var posY = dropPosition?.Y ?? centerY - defaultSize / 2.0;
-
-            var annotation = new EmojiAnnotation
-            {
-                UnicodeSequence = unicodeSequence,
-                DisplayName = displayName,
-                StartPoint = new SKPoint((float)posX, (float)posY),
-                EndPoint = new SKPoint((float)(posX + defaultSize), (float)(posY + defaultSize))
-            };
-
-            var control = CreateControlForAnnotation(annotation);
-            if (control == null)
-            {
-                return;
-            }
-
-            canvas.Children.Add(control);
-            _editorCore.AddAnnotation(annotation);
-            vm.HasAnnotations = true;
-            vm.ActiveTool = EditorTool.Select;
-            _selectionController.SetSelectedShape(control);
-        }
 
         /// <summary>
         /// Handles DragOver event to show appropriate drag cursor.
@@ -2244,17 +2198,6 @@ namespace ShareX.ImageEditor.Presentation.Views
             }
         }
 
-        private void OnEmojiInsertionRequested(object? sender, EmojiSelectionRequest e)
-        {
-            try
-            {
-                InsertEmojiAnnotation(e.UnicodeSequence, e.DisplayName);
-            }
-            catch (Exception ex)
-            {
-                EditorServices.ReportWarning(nameof(EditorView), $"Failed to render emoji '{e.DisplayName}'.", ex);
-            }
-        }
 
         private async Task OnCopyImageRequested()
         {
