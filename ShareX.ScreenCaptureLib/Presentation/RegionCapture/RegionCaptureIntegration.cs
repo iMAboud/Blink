@@ -16,7 +16,6 @@
 
 using Avalonia.Threading;
 using ShareX.AvaloniaUI.Integration;
-using ShareX.ImageEditor.Integration;
 using System;
 using System.Drawing;
 using System.Threading.Tasks;
@@ -52,7 +51,6 @@ public static class RegionCaptureIntegration
 
             try
             {
-                ImageEditorIntegration.Initialize();
                 window = new RegionCaptureWindow(request);
                 completion.TrySetResult(await window.CaptureAsync());
             }

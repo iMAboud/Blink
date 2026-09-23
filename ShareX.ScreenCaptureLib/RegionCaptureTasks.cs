@@ -26,7 +26,6 @@
 #nullable enable
 
 using ShareX.HelpersLib;
-using ShareX.ImageEditor.Integration;
 using ShareX.ScreenCaptureLib.Presentation.RegionCapture;
 using SkiaSharp;
 using System.Drawing;
@@ -87,10 +86,14 @@ public static class RegionCaptureTasks
             CaptureCursor = false
         };
 
-        Rectangle screenBounds = CaptureHelpers.GetActiveScreenBounds();
+        Rectangle screenBounds = options.ActiveMonitorMode
+            ? CaptureHelpers.GetActiveScreenBounds()
+            : CaptureHelpers.GetScreenBounds();
 
         SKBitmap frozenScreenshot;
-        using (Bitmap canvas = screenshot.CaptureActiveMonitor())
+        using (Bitmap canvas = options.ActiveMonitorMode
+            ? screenshot.CaptureActiveMonitor()
+            : screenshot.CaptureFullscreen())
         {
             frozenScreenshot = GdiSkiaBitmapConverter.ToSKBitmap(canvas);
         }
@@ -99,9 +102,7 @@ public static class RegionCaptureTasks
         {
             Screenshot = frozenScreenshot,
             ScreenBounds = screenBounds,
-            RegionCaptureOptions = options,
-            ImageEditorOptions = new ImageEditorOptions(),
-            EnableAnnotations = false
+            RegionCaptureOptions = options
         };
 
         return await RegionCaptureIntegration.CaptureAsync(request);

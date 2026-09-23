@@ -1,4 +1,4 @@
-﻿#region License Information (GPL v3)
+#region License Information (GPL v3)
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
@@ -37,7 +37,9 @@ namespace ShareX.ScreenCaptureLib
         public List<IntPtr> IgnoreHandleList { get; set; } = new List<IntPtr>();
         public List<string> IgnoreClassNameList { get; set; } = new List<string>()
         {
-            "CEF-OSC-WIDGET" // NVIDIA GeForce Overlay DT
+            "CEF-OSC-WIDGET", // NVIDIA GeForce Overlay DT
+            "Progman",
+            "WorkerW"
         };
         public bool IncludeChildWindows { get; set; }
         public int Timeout { get; set; }

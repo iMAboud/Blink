@@ -20,8 +20,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Packages.props = Directory.Packages.props
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShareX.ImageEditor", "ShareX.ImageEditor\ShareX.ImageEditor.csproj", "{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShareX.Avalonia", "ShareX.Avalonia\ShareX.Avalonia.csproj", "{6760D11A-1E09-432D-AF4E-DA0C110B69B9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShareX.Tools", "ShareX.Tools\ShareX.Tools.csproj", "{7432E9BA-0664-435B-9F22-53593EAEBE61}"
@@ -212,46 +210,6 @@ Global
 		{E1C94415-3424-4517-A2A1-B2FDD1F59C67}.Steam|Any CPU.Build.0 = Steam|Any CPU
 		{E1C94415-3424-4517-A2A1-B2FDD1F59C67}.Steam|x86.ActiveCfg = Steam|Any CPU
 		{E1C94415-3424-4517-A2A1-B2FDD1F59C67}.Steam|x86.Build.0 = Steam|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Debug|ARM64.ActiveCfg = Debug|ARM64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Debug|ARM64.Build.0 = Debug|ARM64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Debug|x64.ActiveCfg = Debug|x64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Debug|x64.Build.0 = Debug|x64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Debug|x86.Build.0 = Debug|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.MicrosoftStore|ARM64.ActiveCfg = MicrosoftStore|ARM64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.MicrosoftStore|ARM64.Build.0 = MicrosoftStore|ARM64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.MicrosoftStore|x64.ActiveCfg = MicrosoftStore|x64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.MicrosoftStore|x64.Build.0 = MicrosoftStore|x64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.MicrosoftStore|Any CPU.ActiveCfg = MicrosoftStore|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.MicrosoftStore|Any CPU.Build.0 = MicrosoftStore|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.MicrosoftStore|x86.ActiveCfg = MicrosoftStore|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.MicrosoftStore|x86.Build.0 = MicrosoftStore|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.MicrosoftStoreDebug|ARM64.ActiveCfg = MicrosoftStoreDebug|ARM64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.MicrosoftStoreDebug|ARM64.Build.0 = MicrosoftStoreDebug|ARM64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.MicrosoftStoreDebug|x64.ActiveCfg = MicrosoftStoreDebug|x64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.MicrosoftStoreDebug|x64.Build.0 = MicrosoftStoreDebug|x64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.MicrosoftStoreDebug|Any CPU.ActiveCfg = MicrosoftStoreDebug|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.MicrosoftStoreDebug|Any CPU.Build.0 = MicrosoftStoreDebug|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.MicrosoftStoreDebug|x86.ActiveCfg = MicrosoftStoreDebug|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.MicrosoftStoreDebug|x86.Build.0 = MicrosoftStoreDebug|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Release|ARM64.ActiveCfg = Release|ARM64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Release|ARM64.Build.0 = Release|ARM64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Release|x64.ActiveCfg = Release|x64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Release|x64.Build.0 = Release|x64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Release|x86.ActiveCfg = Release|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Release|x86.Build.0 = Release|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Steam|ARM64.ActiveCfg = Steam|ARM64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Steam|ARM64.Build.0 = Steam|ARM64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Steam|x64.ActiveCfg = Steam|x64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Steam|x64.Build.0 = Steam|x64
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Steam|Any CPU.ActiveCfg = Steam|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Steam|Any CPU.Build.0 = Steam|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Steam|x86.ActiveCfg = Steam|Any CPU
-		{0156A9D8-E6EC-CE3A-92B7-AE1A23B9FBAE}.Steam|x86.Build.0 = Steam|Any CPU
 		{6760D11A-1E09-432D-AF4E-DA0C110B69B9}.Debug|ARM64.ActiveCfg = Debug|ARM64
 		{6760D11A-1E09-432D-AF4E-DA0C110B69B9}.Debug|ARM64.Build.0 = Debug|ARM64
 		{6760D11A-1E09-432D-AF4E-DA0C110B69B9}.Debug|x64.ActiveCfg = Debug|x64

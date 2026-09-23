@@ -14,7 +14,6 @@
 
 #nullable enable
 
-using ShareX.ImageEditor.Integration;
 using SkiaSharp;
 using System.Drawing;
 
@@ -29,10 +28,6 @@ public sealed class AvaloniaRegionCaptureRequest
     public required Rectangle ScreenBounds { get; init; }
 
     public required RegionCaptureOptions RegionCaptureOptions { get; init; }
-
-    public required ImageEditorOptions ImageEditorOptions { get; init; }
-
-    public bool EnableAnnotations { get; init; } = true;
 
     /// <summary>Optional captured cursor bitmap. Ownership transfers to the capture window.</summary>
     public SKBitmap? CursorBitmap { get; init; }

@@ -1,7 +1,5 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:views="using:ShareX.ImageEditor.Presentation.Views"
-        xmlns:editorControls="using:ShareX.ImageEditor.Presentation.Controls"
         xmlns:capture="using:ShareX.ScreenCaptureLib.Presentation.RegionCapture"
         xmlns:localization="using:ShareX.ScreenCaptureLib.Localization"
         xmlns:theming="using:ShareX.AvaloniaUI.Theming"
@@ -12,31 +10,7 @@
         Background="Black"
         FontFamily="{DynamicResource ShareX.FontFamily.Default}"
         Foreground="{DynamicResource ShareX.Brush.Text}">
-    <Window.Styles>
-        <Style Selector="Grid.capture-toolbar">
-            <Setter Property="Opacity" Value="1"/>
-            <Setter Property="RenderTransform" Value="translateY(0px)"/>
-            <Setter Property="RenderTransformOrigin" Value="50%,0%"/>
-            <Setter Property="IsHitTestVisible" Value="True"/>
-            <Setter Property="Transitions">
-                <Transitions>
-                    <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
-                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2"/>
-                </Transitions>
-            </Setter>
-
-            <Style Selector="^.hidden">
-                <Setter Property="Opacity" Value="0"/>
-                <Setter Property="RenderTransform" Value="translateY(-28px)"/>
-                <Setter Property="IsHitTestVisible" Value="False"/>
-            </Style>
-        </Style>
-    </Window.Styles>
-
     <Grid x:Name="RootGrid" Background="Black">
-        <!-- The shared editor workspace owns the frozen screenshot and annotations. -->
-        <views:EditorView x:Name="EditorWorkspace"/>
-
         <!-- The region overlay uses image-pixel coordinates and is scaled once to physical pixels. -->
         <LayoutTransformControl x:Name="RegionTransform"
                                 HorizontalAlignment="Center"
@@ -48,6 +22,9 @@
                   PointerMoved="OnRegionPointerMoved"
                   PointerReleased="OnRegionPointerReleased"
                   PointerWheelChanged="OnRegionPointerWheelChanged">
+                <Image x:Name="BackgroundImage"
+                       Stretch="Fill"
+                       IsHitTestVisible="False"/>
                 <capture:RegionSelectionOverlay x:Name="RegionOverlay"
                                                 AccentBrush="{DynamicResource ShareX.Brush.Accent.Start}"
                                                 IsHitTestVisible="False"/>
@@ -109,26 +86,6 @@
                     IsVisible="False">
                 <TextBlock x:Name="SelectionInfoText" FontSize="12" FontWeight="SemiBold"/>
             </Border>
-        </Canvas>
-
-        <!-- Capture host toolbar: rectangle selection plus the shared non-destructive editor tools. -->
-        <Canvas>
-            <Grid x:Name="CaptureToolbar"
-                  Classes="capture-toolbar"
-                  MaxWidth="{Binding Bounds.Width, RelativeSource={RelativeSource AncestorType=Window}}">
-                <editorControls:AnnotationToolbar x:Name="CaptureAnnotationToolbar"
-                                                  MainToolbarBorderThickness="1"
-                                                  MainToolbarCornerRadius="0,0,4,4"
-                                                  ShowEditingActions="False">
-                    <editorControls:AnnotationToolbar.MainToolbarLeadingContent>
-                        <Button x:Name="RegionToolButton"
-                                Classes="toolbar-button active"
-                                Click="OnRegionToolClick"
-                                ToolTip.Tip="{x:Static localization:Strings.RegionCaptureWindow_RectangleRegionTab}"
-                                Content="{x:Static theming:LucideIcons.scan}"/>
-                    </editorControls:AnnotationToolbar.MainToolbarLeadingContent>
-                </editorControls:AnnotationToolbar>
-            </Grid>
         </Canvas>
     </Grid>
 </Window>
