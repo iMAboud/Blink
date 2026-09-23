@@ -1033,7 +1033,6 @@ namespace ShareX.ImageEditor.Presentation.ViewModels
                     EditorTool.Freehand => Strings.ToolbarCustomizationItemViewModel_Freehand,
                     EditorTool.Text => Strings.ToolbarCustomizationItemViewModel_Text,
                     EditorTool.Cursor => Strings.ToolbarCustomizationItemViewModel_Cursor,
-                    EditorTool.Emoji => Strings.ToolbarCustomizationItemViewModel_Emoji,
                     EditorTool.SpeechBalloon => Strings.ToolbarCustomizationItemViewModel_SpeechBalloon,
                     EditorTool.Step => Strings.ToolbarCustomizationItemViewModel_Step,
                     EditorTool.Blur => Strings.ToolbarCustomizationItemViewModel_Blur,

@@ -10,7 +10,6 @@
              xmlns:editorTheming="using:ShareX.ImageEditor.Presentation.Theming"
              xmlns:helpers="using:ShareX.ImageEditor.Presentation.Rendering"
              xmlns:controls="using:ShareX.ImageEditor.Presentation.Controls"
-             xmlns:easterEggs="using:ShareX.ImageEditor.Presentation.EasterEggs"
              mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
              x:Class="ShareX.ImageEditor.Presentation.Views.EditorView"
              x:DataType="vm:MainViewModel"
@@ -61,9 +60,6 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:InsertImageDialogViewModel}" x:DataType="vm:InsertImageDialogViewModel">
             <views:InsertImageDialogView />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:EmojiPickerDialogViewModel}" x:DataType="vm:EmojiPickerDialogViewModel">
-            <views:EmojiPickerDialogView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:StartScreenDialogViewModel}" x:DataType="vm:StartScreenDialogViewModel">
             <views:StartScreenDialogView />
@@ -568,10 +564,6 @@
                                 </Border>
                             </Border>
 
-                            <!-- Isolated visual host for the optional Konami-code shader animation. -->
-                            <easterEggs:ShaderEasterEggOverlay x:Name="EasterEggOverlay"
-                                                                  IsVisible="False"
-                                                                  IsHitTestVisible="False"/>
                         </Grid>
                     </LayoutTransformControl>
                 </ScrollViewer>

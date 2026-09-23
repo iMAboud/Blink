@@ -33,7 +33,6 @@ using ShareX.ImageEditor.Core.Annotations;
 using ShareX.ImageEditor.Core.Editor;
 using ShareX.ImageEditor.Integration;
 using ShareX.ImageEditor.Localization;
-using ShareX.ImageEditor.Presentation.Emoji;
 using System.Collections.ObjectModel;
 
 namespace ShareX.ImageEditor.Presentation.ViewModels
@@ -118,7 +117,6 @@ namespace ShareX.ImageEditor.Presentation.ViewModels
         public event EventHandler? ZoomToFitRequested;
         public event EventHandler? CloseRequested;
         public event EventHandler? ImageInsertionRequested;
-        public event EventHandler<EmojiSelectionRequest>? EmojiInsertionRequested;
 
         // File menu events (Image Editor Mode)
         public event EventHandler? NewImageRequested;
@@ -1106,12 +1104,6 @@ namespace ShareX.ImageEditor.Presentation.ViewModels
                 return;
             }
 
-            if (tool == EditorTool.Emoji)
-            {
-                DeselectRequested?.Invoke(this, EventArgs.Empty);
-                ShowEmojiPickerDialog();
-                return;
-            }
 
             // Re-selecting the active crop/cut-out tool should not cancel the current operation
             if (ActiveTool == tool && tool is EditorTool.Crop or EditorTool.CutOut)
@@ -1140,32 +1132,6 @@ namespace ShareX.ImageEditor.Presentation.ViewModels
             ImageInsertionRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        internal void ShowEmojiPickerDialog(Action<EmojiCatalogEntry>? onSelect = null)
-        {
-            if (IsModalOpen)
-            {
-                return;
-            }
-
-            var dialog = new EmojiPickerDialogViewModel(
-                onSelect: entry =>
-                {
-                    CloseModal();
-
-                    if (onSelect != null)
-                    {
-                        onSelect(entry);
-                    }
-                    else
-                    {
-                        EmojiInsertionRequested?.Invoke(this, new EmojiSelectionRequest(entry.Unicode, entry.DisplayName));
-                    }
-                },
-                onCancel: CloseModal);
-
-            ModalContent = dialog;
-            IsModalOpen = true;
-        }
 
         [RelayCommand]
         private void SetColor(string color)

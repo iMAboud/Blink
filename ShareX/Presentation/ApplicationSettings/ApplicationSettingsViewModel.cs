@@ -56,7 +56,6 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
     private bool _firefoxAddonSupport;
     private bool _steamShowInApp;
     private bool _exportSettings = true;
-    private bool _exportHistory = true;
     private bool _personalPathDirty;
     private bool _isBusy;
 
@@ -122,7 +121,7 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
     public bool IsMainWindowPage => IsPage("main-window");
     public bool IsClipboardFormatsPage => IsPage("clipboard-formats");
     public bool IsUploadPage => IsPage("upload");
-    public bool IsHistoryPage => IsPage("history");
+    public bool IsRecentTasksPage => IsPage("recent-tasks");
     public bool IsPrintPage => IsPage("print");
     public bool IsProxyPage => IsPage("proxy");
     public bool IsTrayPage => IsPage("tray");
@@ -461,8 +460,7 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
     public string ScreenshotsFolderPreview { get => _screenshotsFolderPreview; private set => SetField(ref _screenshotsFolderPreview, value); }
 
     public bool ExportSettings { get => _exportSettings; set { if (SetField(ref _exportSettings, value)) OnPropertyChanged(nameof(CanExport)); } }
-    public bool ExportHistory { get => _exportHistory; set { if (SetField(ref _exportHistory, value)) OnPropertyChanged(nameof(CanExport)); } }
-    public bool CanExport => !IsBusy && (ExportSettings || ExportHistory);
+    public bool CanExport => !IsBusy && ExportSettings;
 
     public bool AutoCleanupBackupFiles { get => Settings.AutoCleanupBackupFiles; set => SetSetting(Settings.AutoCleanupBackupFiles, value, x => Settings.AutoCleanupBackupFiles = x); }
     public bool AutoCleanupLogFiles { get => Settings.AutoCleanupLogFiles; set => SetSetting(Settings.AutoCleanupLogFiles, value, x => Settings.AutoCleanupLogFiles = x); }
@@ -518,8 +516,6 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
 
     public decimal MaxUploadFailRetry { get => Settings.MaxUploadFailRetry; set => SetSetting(Settings.MaxUploadFailRetry, decimal.ToInt32(value), x => Settings.MaxUploadFailRetry = x); }
 
-    public bool HistorySaveTasks { get => Settings.HistorySaveTasks; set => SetSetting(Settings.HistorySaveTasks, value, x => Settings.HistorySaveTasks = x); }
-    public bool HistoryCheckURL { get => Settings.HistoryCheckURL; set => SetSetting(Settings.HistoryCheckURL, value, x => Settings.HistoryCheckURL = x); }
     public bool RecentTasksSave { get => Settings.RecentTasksSave; set => SetSetting(Settings.RecentTasksSave, value, x => Settings.RecentTasksSave = x); }
     public decimal RecentTasksMaxCount { get => Settings.RecentTasksMaxCount; set => SetSetting(Settings.RecentTasksMaxCount, decimal.ToInt32(value), x => Settings.RecentTasksMaxCount = x); }
     public bool RecentTasksShowInMainWindow { get => Settings.RecentTasksShowInMainWindow; set => SetSetting(Settings.RecentTasksShowInMainWindow, value, x => Settings.RecentTasksShowInMainWindow = x); }
@@ -764,11 +760,10 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
         try
         {
             bool exportSettings = ExportSettings;
-            bool exportHistory = ExportHistory;
             bool result = await Task.Run(() =>
             {
                 SettingManager.SaveAllSettings();
-                return SettingManager.Export(path, exportSettings, exportHistory);
+                return SettingManager.Export(path, exportSettings, false);
             });
             StatusMessage = result
                 ? string.Format(Strings.ApplicationSettingsWindow_BackupExportedTo, path)
@@ -955,7 +950,7 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
             Nav("updater", "Updater", LucideIcons.download),
             Nav("paths", Strings.ApplicationSettingsWindow_Paths, LucideIcons.folder),
             Nav("settings", Strings.ApplicationSettingsWindow_Settings, LucideIcons.database_backup),
-            Nav("history", Strings.ApplicationSettingsWindow_History, LucideIcons.history),
+            Nav("recent-tasks", Strings.ApplicationSettingsWindow_RecentTasks, LucideIcons.clock),
             Nav("tray", "System Tray", LucideIcons.panel_bottom),
             Nav("advanced", Strings.ApplicationSettingsWindow_Advanced, LucideIcons.sliders_horizontal)
         ];
@@ -1066,7 +1061,7 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
         OnPropertyChanged(nameof(IsMainWindowPage));
         OnPropertyChanged(nameof(IsClipboardFormatsPage));
         OnPropertyChanged(nameof(IsUploadPage));
-        OnPropertyChanged(nameof(IsHistoryPage));
+        OnPropertyChanged(nameof(IsRecentTasksPage));
         OnPropertyChanged(nameof(IsPrintPage));
         OnPropertyChanged(nameof(IsProxyPage));
         OnPropertyChanged(nameof(IsTrayPage));
@@ -1185,7 +1180,6 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
             HotkeyType.StopUploads,
             HotkeyType.DisableHotkeys,
             HotkeyType.OpenMainWindow,
-            HotkeyType.OpenImageHistory,
             HotkeyType.ToggleActionsToolbar,
             HotkeyType.ToggleTrayMenu,
             HotkeyType.ExitBlink

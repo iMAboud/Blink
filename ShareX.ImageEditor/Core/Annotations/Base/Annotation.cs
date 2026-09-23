@@ -36,7 +36,6 @@ namespace ShareX.ImageEditor.Core.Annotations;
 [JsonDerivedType(typeof(CropAnnotation), typeDiscriminator: "Crop")]
 [JsonDerivedType(typeof(CursorAnnotation), typeDiscriminator: "Cursor")]
 [JsonDerivedType(typeof(EllipseAnnotation), typeDiscriminator: "Ellipse")]
-[JsonDerivedType(typeof(EmojiAnnotation), typeDiscriminator: "Emoji")]
 [JsonDerivedType(typeof(FreehandAnnotation), typeDiscriminator: "Freehand")]
 [JsonDerivedType(typeof(HighlightAnnotation), typeDiscriminator: "Highlight")]
 [JsonDerivedType(typeof(ImageAnnotation), typeDiscriminator: "Image")]

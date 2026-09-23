@@ -127,29 +127,7 @@ namespace ShareX.HelpersLib
             return sb.ToString();
         }
 
-        public static string URLEncodeIgnoreEmoji(string text, bool isPath = false)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            for (int i = 0; i < text.Length; i++)
-            {
-                string remainingText = text.Substring(i);
-
-                int emojiLength = Emoji.SearchEmoji(remainingText);
-
-                if (emojiLength > 0)
-                {
-                    sb.Append(remainingText.Substring(0, emojiLength));
-                    i += emojiLength - 1;
-                }
-                else
-                {
-                    sb.Append(URLEncode(remainingText.Substring(0, 1), isPath));
-                }
-            }
-
-            return sb.ToString();
-        }
+        public static string URLEncodeIgnoreEmoji(string text, bool isPath = false) => URLEncode(text, isPath);
 
         public static string RemoveBidiControlCharacters(string text)
         {

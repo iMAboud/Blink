@@ -313,7 +313,6 @@
                                     <TextBlock Classes="hint" Text="{x:Static res:Strings.ApplicationSettingsWindow_DoNotShareAnExportedBackupItCanContainPrivateInformationSuchAsAccountDetailsAndUploadHistory}"/>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <CheckBox Classes="setting" Content="{x:Static res:Strings.ApplicationSettingsWindow_Settings}" IsChecked="{Binding ExportSettings, Mode=TwoWay}"/>
-                                        <CheckBox Classes="setting" Content="{x:Static res:Strings.ApplicationSettingsWindow_History}" IsChecked="{Binding ExportHistory, Mode=TwoWay}"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Spacing="5">
                                         <Button Classes="compact" Content="{x:Static res:Strings.ApplicationSettingsWindow_Export}" IsEnabled="{Binding CanExport}" Click="OnExportClick"/>
@@ -363,19 +362,13 @@
                     </ScrollViewer>
 
                     <!-- History -->
-                    <ScrollViewer controls:SettingsSearch.PageId="history" IsVisible="{Binding IsHistoryPage}" HorizontalContentAlignment="Stretch" HorizontalScrollBarVisibility="Disabled">
+                    <ScrollViewer controls:SettingsSearch.PageId="recent-tasks" IsVisible="{Binding IsRecentTasksPage}" HorizontalContentAlignment="Stretch" HorizontalScrollBarVisibility="Disabled">
                         <StackPanel Margin="28,24,28,32" HorizontalAlignment="Stretch">
                             <Grid Classes="page-title" controls:SettingsSearch.IsPageTitle="True" ColumnDefinitions="Auto,*" ColumnSpacing="9">
-                                <TextBlock Classes="icon page-title-icon" Text="{x:Static theming:LucideIcons.history}"/>
-                                <TextBlock Grid.Column="1" Classes="page-title-text" Text="{x:Static res:Strings.ApplicationSettingsWindow_History}"/>
+                                <TextBlock Classes="icon page-title-icon" Text="{x:Static theming:LucideIcons.clock}"/>
+                                <TextBlock Grid.Column="1" Classes="page-title-text" Text="{x:Static res:Strings.ApplicationSettingsWindow_RecentTasks}"/>
                             </Grid>
-                            <Border Classes="section-card" controls:SettingsSearch.IsPanel="True">
-                                <StackPanel Spacing="4">
-                                    <TextBlock Classes="section-title" Text="{x:Static res:Strings.ApplicationSettingsWindow_History}"/>
-                                    <CheckBox Classes="setting" Content="{x:Static res:Strings.ApplicationSettingsWindow_SaveTasksToHistory}" IsChecked="{Binding HistorySaveTasks, Mode=TwoWay}"/>
-                                    <CheckBox Classes="setting" Content="{x:Static res:Strings.ApplicationSettingsWindow_OnlySaveIfUrlIsNotEmpty}" IsChecked="{Binding HistoryCheckURL, Mode=TwoWay}"/>
-                                </StackPanel>
-                            </Border>
+
                             <Border Classes="section-card" controls:SettingsSearch.IsPanel="True">
                                 <StackPanel Spacing="4">
                                     <TextBlock Classes="section-title" Text="{x:Static res:Strings.ApplicationSettingsWindow_RecentTasks}"/>

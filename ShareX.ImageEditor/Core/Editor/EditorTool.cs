@@ -40,7 +40,6 @@ public enum EditorTool
     SpeechBalloon,
     Step,
     Image,
-    Emoji,
     Cursor,
     Highlight,
     SmartEraser,
