@@ -1323,6 +1323,9 @@ Do you still want to run it?</value>
   <data name="ToastClickAction_Upload" xml:space="preserve">
     <value>Upload file</value>
   </data>
+  <data name="ToastClickAction_OCR" xml:space="preserve">
+    <value>OCR</value>
+  </data>
   <data name="Translator_ASCII" xml:space="preserve">
     <value>ASCII</value>
   </data>

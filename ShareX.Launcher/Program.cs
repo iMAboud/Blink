@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Reflection;
-using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace ShareX.Launcher;
 
@@ -16,8 +16,8 @@ static class Program
     {
         try
         {
-            string? processPath = Environment.ProcessPath;
-            string baseDir = !string.IsNullOrEmpty(processPath) ? Path.GetDirectoryName(processPath)! : AppDomain.CurrentDomain.BaseDirectory;
+            string processPath = GetProcessPath();
+            string baseDir = !string.IsNullOrEmpty(processPath) ? Path.GetDirectoryName(processPath) : AppDomain.CurrentDomain.BaseDirectory;
             string appDir = Path.Combine(baseDir, "App");
             string targetExe = Path.Combine(appDir, "Blink.exe");
 
@@ -62,7 +62,7 @@ static class Program
                         foreach (ZipArchiveEntry entry in archive.Entries)
                         {
                             string fullName = entry.FullName;
-                            if (string.IsNullOrEmpty(entry.Name) && (fullName.EndsWith('/') || fullName.EndsWith('\\')))
+                            if (string.IsNullOrEmpty(entry.Name) && (fullName.EndsWith("/", StringComparison.Ordinal) || fullName.EndsWith("\\", StringComparison.Ordinal)))
                             {
                                 Directory.CreateDirectory(Path.Combine(appDir, fullName));
                                 continue;
@@ -74,7 +74,7 @@ static class Program
                                 continue;
                             }
 
-                            string? destDir = Path.GetDirectoryName(destPath);
+                            string destDir = Path.GetDirectoryName(destPath);
                             if (!string.IsNullOrEmpty(destDir) && !Directory.Exists(destDir))
                             {
                                 Directory.CreateDirectory(destDir);
@@ -102,25 +102,46 @@ static class Program
                     WorkingDirectory = appDir,
                     UseShellExecute = false
                 };
-                foreach (string arg in args)
+                if (args != null && args.Length > 0)
                 {
-                    psi.ArgumentList.Add(arg);
+                    psi.Arguments = string.Join(" ", args);
                 }
                 Process.Start(psi);
             }
             else
             {
-                MessageBox.Show("Could not find or extract Blink executable.", "Blink",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                NativeMessageBox("Could not find or extract Blink executable.", "Blink");
             }
         }
         catch (Exception ex)
         {
-            string? procPath = Environment.ProcessPath;
-            string dir = !string.IsNullOrEmpty(procPath) ? Path.GetDirectoryName(procPath)! : AppDomain.CurrentDomain.BaseDirectory;
+            string procPath = GetProcessPath();
+            string dir = !string.IsNullOrEmpty(procPath) ? Path.GetDirectoryName(procPath) : AppDomain.CurrentDomain.BaseDirectory;
             try { File.WriteAllText(Path.Combine(dir, "launcher_error.txt"), ex.ToString()); } catch { }
-            MessageBox.Show("Failed to launch Blink:\n" + ex.Message, "Blink",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            NativeMessageBox("Failed to launch Blink:\n" + ex.Message, "Blink");
+        }
+    }
+
+    const uint MB_OK = 0x00000000;
+    const uint MB_ICONERROR = 0x00000010;
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    static extern int MessageBoxW(IntPtr hWnd, string text, string caption, uint type);
+
+    static void NativeMessageBox(string text, string caption)
+    {
+        MessageBoxW(IntPtr.Zero, text, caption, MB_OK | MB_ICONERROR);
+    }
+
+    static string GetProcessPath()
+    {
+        try
+        {
+            return Process.GetCurrentProcess().MainModule.FileName;
+        }
+        catch
+        {
+            return Assembly.GetEntryAssembly()?.Location ?? "";
         }
     }
 }

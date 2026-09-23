@@ -190,6 +190,8 @@ internal sealed class TaskSettingsPageBuilder
         toastOptions.Children.Add(Row(Strings.TaskSettingsWindow_LeftClickAction, EnumCombo(() => general.ToastWindowLeftClickAction, value => general.ToastWindowLeftClickAction = value)));
         toastOptions.Children.Add(Row(Strings.TaskSettingsWindow_RightClickAction, EnumCombo(() => general.ToastWindowRightClickAction, value => general.ToastWindowRightClickAction = value)));
         toastOptions.Children.Add(Row(Strings.TaskSettingsWindow_MiddleClickAction, EnumCombo(() => general.ToastWindowMiddleClickAction, value => general.ToastWindowMiddleClickAction = value)));
+        toastOptions.Children.Add(Row(Strings.TaskSettingsWindow_Mouse4Click, EnumCombo(() => general.ToastWindowMouse4ClickAction, value => general.ToastWindowMouse4ClickAction = value)));
+        toastOptions.Children.Add(Row(Strings.TaskSettingsWindow_Mouse5Click, EnumCombo(() => general.ToastWindowMouse5ClickAction, value => general.ToastWindowMouse5ClickAction = value)));
         toastOptions.Children.Add(Row(Strings.TaskSettingsWindow_NotificationButtonSize, Number(() => general.ToastWindowButtonSize,
             value => general.ToastWindowButtonSize = (int)value, 16, 128)));
         toastOptions.Children.Add(Row(Strings.TaskSettingsWindow_NotificationButtonsLabel, Button(Strings.TaskSettingsWindow_ConfigureWithEllipsis, () =>

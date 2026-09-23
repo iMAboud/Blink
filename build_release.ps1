@@ -39,16 +39,21 @@ if (Test-Path $payloadZip) {
 $zipSize = (Get-Item $payloadZip).Length / 1MB
 Write-Host ("Payload archive created. Size: {0:N2} MB" -f $zipSize) -ForegroundColor Green
 
-Write-Host "Building Blink single-executable launcher..." -ForegroundColor Cyan
-dotnet publish (Join-Path $rootDir "ShareX.Launcher\ShareX.Launcher.csproj") -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o (Join-Path $rootDir "ShareX.Launcher\publish")
+Write-Host "Building Blink single-executable launcher (.NET Framework 4.8)..." -ForegroundColor Cyan
+dotnet build (Join-Path $rootDir "ShareX.Launcher\ShareX.Launcher.csproj") -c Release
 if ($LASTEXITCODE -ne 0) {
-    throw "Launcher publish failed."
+    throw "Launcher build failed."
 }
 
-$launcherBuilt = Join-Path $rootDir "ShareX.Launcher\publish\Blink.exe"
+$launcherBuilt = Join-Path $rootDir "ShareX.Launcher\bin\Release\Blink.exe"
+$launcherConfig = Join-Path $rootDir "ShareX.Launcher\bin\Release\Blink.exe.config"
 $distSingleExe = Join-Path $releaseDir "Blink.exe"
 Copy-Item $launcherBuilt -Destination $distSingleExe -Force
 Copy-Item $launcherBuilt -Destination (Join-Path $rootDir "Blink.exe") -Force
+if (Test-Path $launcherConfig) {
+    Copy-Item $launcherConfig -Destination (Join-Path $releaseDir "Blink.exe.config") -Force
+    Copy-Item $launcherConfig -Destination (Join-Path $rootDir "Blink.exe.config") -Force
+}
 
 # Ensure no legacy ShareX.exe remains
 Remove-Item (Join-Path $releaseDir "ShareX.exe") -Force -ErrorAction SilentlyContinue

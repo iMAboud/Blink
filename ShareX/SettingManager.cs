@@ -354,6 +354,8 @@ namespace ShareX
                     Settings.UpdateChannel = UpdateChannel.PreRelease;
                 }
             }
+
+            NotificationActionButton.EnsureButton(DefaultTaskSettings.GeneralSettings.ToastWindowButtons, ToastClickAction.OCR);
         }
 
         public static void HistoryConnect()
@@ -403,6 +405,14 @@ namespace ShareX
                         taskSettings.CaptureSettings.ScrollingCaptureOptions = new ScrollingCaptureOptions();
                         taskSettings.CaptureSettings.FFmpegOptions.FixSources();
                     }
+                }
+            }
+
+            foreach (TaskSettings taskSettings in HotkeysConfig.Hotkeys.Select(x => x.TaskSettings))
+            {
+                if (taskSettings?.GeneralSettings?.ToastWindowButtons != null)
+                {
+                    NotificationActionButton.EnsureButton(taskSettings.GeneralSettings.ToastWindowButtons, ToastClickAction.OCR);
                 }
             }
         }

@@ -1,4 +1,4 @@
-﻿#region License Information (GPL v3)
+#region License Information (GPL v3)
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
@@ -53,6 +53,8 @@ namespace ShareX
         public ToastClickAction LeftClickAction { get; set; }
         public ToastClickAction RightClickAction { get; set; }
         public ToastClickAction MiddleClickAction { get; set; }
+        public ToastClickAction Mouse4ClickAction { get; set; }
+        public ToastClickAction Mouse5ClickAction { get; set; }
         public int ActionButtonSize { get; set; } = 40;
         public List<NotificationActionButton> ActionButtons { get; set; } = NotificationActionButton.CreateDefaultButtons();
 

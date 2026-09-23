@@ -57,11 +57,24 @@ public sealed class NotificationActionButton
         new(ToastClickAction.CopyImageToClipboard),
         new(ToastClickAction.AnnotateImage),
         new(ToastClickAction.PinToScreen),
-        new(ToastClickAction.Upload)
+        new(ToastClickAction.Upload),
+        new(ToastClickAction.OCR)
     ];
 
     public static List<NotificationActionButton> CloneButtons(IEnumerable<NotificationActionButton>? buttons) =>
         buttons?.Where(button => button != null).Select(button => button.Clone()).ToList() ?? [];
+
+    /// <summary>
+    /// Ensures that <paramref name="action"/> is present in <paramref name="buttons"/>.
+    /// If missing, appends it at the end. Used for settings migration.
+    /// </summary>
+    public static void EnsureButton(List<NotificationActionButton> buttons, ToastClickAction action)
+    {
+        if (buttons != null && !buttons.Any(b => b.Action == action))
+        {
+            buttons.Add(new NotificationActionButton(action));
+        }
+    }
 
     public static string GetDefaultIcon(ToastClickAction action) => action switch
     {
@@ -76,6 +89,7 @@ public sealed class NotificationActionButton
         ToastClickAction.Upload => LucideIcons.upload,
         ToastClickAction.PinToScreen => LucideIcons.pin,
         ToastClickAction.DeleteFile => LucideIcons.trash_2,
+        ToastClickAction.OCR => LucideIcons.scan_text,
         _ => LucideIcons.x
     };
 }

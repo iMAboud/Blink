@@ -515,6 +515,8 @@ public partial class NotificationWindow : Window
             PointerUpdateKind.LeftButtonReleased => _config.LeftClickAction,
             PointerUpdateKind.RightButtonReleased => _config.RightClickAction,
             PointerUpdateKind.MiddleButtonReleased => _config.MiddleClickAction,
+            PointerUpdateKind.XButton1Released => _config.Mouse4ClickAction,
+            PointerUpdateKind.XButton2Released => _config.Mouse5ClickAction,
             _ => ToastClickAction.CloseNotification
         };
 
@@ -624,6 +626,12 @@ public partial class NotificationWindow : Window
                         FileHelpers.DeleteFile(config.FilePath, true);
                     }
                     break;
+                case ToastClickAction.OCR:
+                    if (!string.IsNullOrEmpty(config.FilePath) && FileHelpers.IsImageFile(config.FilePath))
+                    {
+                        _ = TaskHelpers.OCRImage(config.FilePath);
+                    }
+                    break;
             }
         }
 
@@ -645,7 +653,8 @@ public partial class NotificationWindow : Window
 
         return action switch
         {
-            ToastClickAction.AnnotateImage or ToastClickAction.CopyImageToClipboard or ToastClickAction.PinToScreen => hasImageFile,
+            ToastClickAction.AnnotateImage or ToastClickAction.CopyImageToClipboard or
+                ToastClickAction.PinToScreen or ToastClickAction.OCR => hasImageFile,
             ToastClickAction.CopyFile or ToastClickAction.CopyFilePath or ToastClickAction.OpenFile or
                 ToastClickAction.OpenFolder or ToastClickAction.Upload or ToastClickAction.DeleteFile => hasFile,
             ToastClickAction.CopyUrl or ToastClickAction.OpenUrl => hasTarget,

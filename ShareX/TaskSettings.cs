@@ -317,6 +317,8 @@ namespace ShareX
         public ToastClickAction ToastWindowLeftClickAction = ToastClickAction.OpenUrl;
         public ToastClickAction ToastWindowRightClickAction = ToastClickAction.CloseNotification;
         public ToastClickAction ToastWindowMiddleClickAction = ToastClickAction.Upload;
+        public ToastClickAction ToastWindowMouse4ClickAction = ToastClickAction.CloseNotification;
+        public ToastClickAction ToastWindowMouse5ClickAction = ToastClickAction.CloseNotification;
         public int ToastWindowButtonSize = 40;
         public List<NotificationActionButton> ToastWindowButtons = NotificationActionButton.CreateDefaultButtons();
         public bool ToastWindowAutoHide = true;
