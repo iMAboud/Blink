@@ -449,12 +449,6 @@
               "DismissNotification": true
             },
             {
-              "Action": "AnnotateImage",
-              "Label": null,
-              "Icon": null,
-              "DismissNotification": true
-            },
-            {
               "Action": "PinToScreen",
               "Label": null,
               "Icon": null,

@@ -27,7 +27,6 @@ using Avalonia.Threading;
 using ShareX.AvaloniaUI.Theming;
 using ShareX.AvaloniaUI.Windows;
 using ShareX.HelpersLib;
-using ShareX.ImageEditor.Integration;
 using ShareX.Localization;
 using ShareX.Properties;
 using ShareX.ScreenCaptureLib;
@@ -1146,132 +1145,29 @@ namespace ShareX
 
         public static void OpenImageEditor(TaskSettings taskSettings = null)
         {
-            if (taskSettings == null) taskSettings = TaskSettings.GetDefaultTaskSettings();
-
-            AnnotateImageAsync(null, null, taskSettings);
         }
 
         public static void AnnotateImageFromFile(string filePath, TaskSettings taskSettings = null)
         {
-            if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
-            {
-                if (taskSettings == null) taskSettings = TaskSettings.GetDefaultTaskSettings();
-
-                Bitmap bmp = ImageHelpers.LoadImage(filePath);
-
-                AnnotateImageAsync(bmp, filePath, taskSettings);
-            }
-            else
-            {
-                MessageBox.Show(string.Format(Strings.TaskHelpers_FileDoesNotExist, filePath), "Blink", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
         }
 
         public static void AnnotateImageAsync(Bitmap bmp, string filePath, TaskSettings taskSettings)
         {
-            ThreadWorker worker = new ThreadWorker();
-
-            worker.DoWork += () =>
+            if (bmp != null)
             {
-                bmp = AnnotateImage(bmp, filePath, taskSettings);
-            };
-
-            worker.Completed += () =>
-            {
-                if (bmp != null)
-                {
-                    UploadManager.RunImageTask(bmp, taskSettings);
-                }
-            };
-
-            worker.Start(ApartmentState.STA);
+                UploadManager.RunImageTask(bmp, taskSettings);
+            }
         }
 
         public static Bitmap AnnotateImage(Bitmap bmp, string filePath, TaskSettings taskSettings, bool taskMode = false)
         {
-            return AnnotateImageModern(bmp, filePath, taskSettings, taskMode);
+            return bmp;
         }
 
         private static Bitmap AnnotateImageModern(Bitmap bmp, string filePath, TaskSettings taskSettings, bool taskMode = false,
             bool openBackgroundPanel = false)
         {
-            Bitmap bmpResult = null;
-
-            ImageEditorCallbacks events = new ImageEditorCallbacks
-            {
-                CopyImageRequested = (skBitmap) =>
-                {
-                    using Bitmap img = skBitmap.ToBitmap();
-                    CopyImageOnUiThread(img);
-                },
-                SaveImageRequested = (skBitmap, newFilePath) =>
-                {
-                    using Bitmap img = skBitmap.ToBitmap();
-
-                    if (string.IsNullOrEmpty(newFilePath))
-                    {
-                        string screenshotsFolder = GetScreenshotsFolder(taskSettings);
-                        string fileName = GetFileName(taskSettings, taskSettings.ImageSettings.ImageFormat.GetDescription(), img);
-                        newFilePath = Path.Combine(screenshotsFolder, fileName);
-                    }
-
-                    ImageHelpers.SaveImage(img, newFilePath);
-                    return newFilePath;
-                },
-                SaveImageAsRequested = (skBitmap, newFilePath) =>
-                {
-                    using Bitmap img = skBitmap.ToBitmap();
-
-                    if (string.IsNullOrEmpty(newFilePath))
-                    {
-                        string screenshotsFolder = GetScreenshotsFolder(taskSettings);
-                        string fileName = GetFileName(taskSettings, taskSettings.ImageSettings.ImageFormat.GetDescription(), img);
-                        newFilePath = Path.Combine(screenshotsFolder, fileName);
-                    }
-
-                    newFilePath = ImageHelpers.SaveImageFileDialog(img, newFilePath);
-                    return newFilePath;
-                },
-                PrintImageRequested = (skBitmap) =>
-                {
-                    Bitmap bmp = skBitmap.ToBitmap();
-                    PrintImageOnUiThread(bmp);
-                },
-                PinImageRequested = (skBitmap) =>
-                {
-                    Bitmap bmp = skBitmap.ToBitmap();
-                    PinToScreen(bmp, taskSettings);
-                },
-                UploadImageRequested = (skBitmap) =>
-                {
-                    Bitmap bmp = skBitmap.ToBitmap();
-                    UploadImageOnUiThread(bmp, taskSettings);
-                }
-            };
-
-            SKBitmap skBitmapResult = null;
-
-            if (bmp != null)
-            {
-                using SKBitmap skBitmap = GdiBitmapToSkBitmap(bmp);
-                skBitmapResult = ImageEditorIntegration.ShowEditorDialog(skBitmap, taskSettings.ToolsSettingsReference.ImageEditorOptions,
-                    events, taskMode, filePath, openBackgroundPanel);
-            }
-            else
-            {
-                skBitmapResult = ImageEditorIntegration.ShowEditorDialog(taskSettings.ToolsSettingsReference.ImageEditorOptions,
-                    events, taskMode, filePath, openBackgroundPanel);
-            }
-
-            if (skBitmapResult != null)
-            {
-                using (skBitmapResult)
-                {
-                    bmpResult = skBitmapResult.ToBitmap();
-                }
-            }
-
-            return bmpResult;
+            return bmp;
         }
 
         // Avoid the slow PNG re-encode path for large captures while still bypassing
@@ -1393,51 +1289,11 @@ namespace ShareX
 
         public static void OpenImageBeautifier(string filePath, TaskSettings taskSettings = null)
         {
-            if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
-            {
-                if (taskSettings == null) taskSettings = TaskSettings.GetDefaultTaskSettings();
-
-                Bitmap bmp = ImageHelpers.LoadImage(filePath);
-                Bitmap bmpResult = null;
-                ThreadWorker worker = new ThreadWorker();
-
-                worker.DoWork += () =>
-                {
-                    using (bmp)
-                    {
-                        bmpResult = AnnotateImageModern(bmp, filePath, taskSettings, openBackgroundPanel: true);
-                    }
-                };
-
-                worker.Completed += () =>
-                {
-                    if (bmpResult != null)
-                    {
-                        UploadManager.RunImageTask(bmpResult, taskSettings);
-                    }
-                };
-
-                worker.Start(ApartmentState.STA);
-            }
         }
 
         public static Bitmap BeautifyImage(Bitmap bmp, TaskSettings taskSettings = null)
         {
-            if (bmp != null)
-            {
-                if (taskSettings == null) taskSettings = TaskSettings.GetDefaultTaskSettings();
-
-                try
-                {
-                    return AnnotateImageModern(bmp, null, taskSettings, taskMode: true, openBackgroundPanel: true);
-                }
-                finally
-                {
-                    bmp.Dispose();
-                }
-            }
-
-            return null;
+            return bmp;
         }
 
         public static void OpenImageEffects(TaskSettings taskSettings = null)

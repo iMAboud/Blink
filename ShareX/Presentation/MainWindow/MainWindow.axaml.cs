@@ -1495,7 +1495,6 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 URLHelpers.OpenURL(info.Result?.ToString());
                 break;
             case ThumbnailViewClickAction.EditImage:
-                if (File.Exists(filePath) && FileHelpers.IsImageFile(filePath)) TaskHelpers.AnnotateImageFromFile(filePath);
                 break;
         }
     }
@@ -1525,15 +1524,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             Item(Strings.MainWindow_DownloadSelectedUrl, LucideIcons.download, _uploadInfoManager.Download,
                 hasSelection && !isWorking && selected!.IsFileURL,
                 new KeyGesture(Key.D, KeyModifiers.Control)),
-            Item(Strings.MainWindow_EditImage, LucideIcons.image, _uploadInfoManager.EditImage,
-                hasSelection && !isWorking && selected!.IsImageFile,
-                new KeyGesture(Key.E, KeyModifiers.Control)),
             Item(Strings.MainWindow_ResizeImage, LucideIcons.maximize_2, _uploadInfoManager.ResizeImages,
                 hasSelection && !isWorking && statuses.Any(x => x.IsImageFile)),
             Item(Strings.MainWindow_TrimVideo, LucideIcons.scissors, _uploadInfoManager.TrimVideo,
                 hasSelection && !isWorking && selected!.IsVideoFile),
-            Item(Strings.MainWindow_BeautifyImage, LucideIcons.sparkles, _uploadInfoManager.BeautifyImage,
-                hasSelection && !isWorking && selected!.IsImageFile),
             Item(Strings.MainWindow_PinToScreen, LucideIcons.pin, _uploadInfoManager.PinToScreen,
                 hasSelection && !isWorking && selected!.IsImageFile,
                 new KeyGesture(Key.P, KeyModifiers.Control)),
@@ -1807,7 +1801,6 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         else if (e.Key == Key.V && control) UploadManager.ClipboardUploadMainWindow();
         else if (e.Key == Key.U && control) _uploadInfoManager.Upload();
         else if (e.Key == Key.D && control) _uploadInfoManager.Download();
-        else if (e.Key == Key.E && control) _uploadInfoManager.EditImage();
         else if (e.Key == Key.P && control) _uploadInfoManager.PinToScreen();
         else if (e.Key == Key.Delete && shift) DeleteSelectedFiles();
         else if (e.Key == Key.Delete) RemoveSelectedTasks();

@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="using:ShareX"
         xmlns:theming="using:ShareX.AvaloniaUI.Theming"
-        xmlns:imageEditorControls="using:ShareX.ImageEditor.Presentation.Controls"
+        xmlns:imageEditorControls="using:ShareX.AvaloniaUI.Controls"
         mc:Ignorable="d"
         d:DesignWidth="1000"
         d:DesignHeight="720"

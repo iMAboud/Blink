@@ -49,10 +49,15 @@ namespace ShareX
             Screenshot screenshot = TaskHelpers.GetScreenshot(taskSettings);
             screenshot.CaptureCursor = false;
 
-            Rectangle screenBounds = CaptureHelpers.GetActiveScreenBounds();
+            bool activeMonitorMode = taskSettings.CaptureSettings.RegionCaptureOptions.ActiveMonitorMode;
+            Rectangle screenBounds = activeMonitorMode
+                ? CaptureHelpers.GetActiveScreenBounds()
+                : CaptureHelpers.GetScreenBounds();
 
             SKBitmap frozenScreenshot;
-            using (Bitmap canvas = screenshot.CaptureActiveMonitor())
+            using (Bitmap canvas = activeMonitorMode
+                ? screenshot.CaptureActiveMonitor()
+                : screenshot.CaptureFullscreen())
             {
                 frozenScreenshot = GdiSkiaBitmapConverter.ToSKBitmap(canvas);
             }
@@ -78,8 +83,6 @@ namespace ShareX
                 Screenshot = frozenScreenshot,
                 ScreenBounds = screenBounds,
                 RegionCaptureOptions = taskSettings.CaptureSettingsReference.RegionCaptureOptions,
-                ImageEditorOptions = taskSettings.ToolsSettingsReference.ImageEditorOptions,
-                EnableAnnotations = !taskSettings.AdvancedSettings.RegionCaptureDisableAnnotation,
                 CursorBitmap = cursorBitmap,
                 CursorPosition = cursorPosition
             };

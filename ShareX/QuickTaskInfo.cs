@@ -1,4 +1,4 @@
-﻿#region License Information (GPL v3)
+#region License Information (GPL v3)
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
@@ -48,12 +48,10 @@ namespace ShareX
             new QuickTaskInfo("Save, Upload, Copy URL", AfterCaptureTasks.SaveImageToFile | AfterCaptureTasks.UploadImageToHost, AfterUploadTasks.CopyURLToClipboard),
             new QuickTaskInfo("Save, Copy image", AfterCaptureTasks.SaveImageToFile | AfterCaptureTasks.CopyImageToClipboard),
             new QuickTaskInfo("Save, Copy image file", AfterCaptureTasks.SaveImageToFile | AfterCaptureTasks.CopyFileToClipboard),
-            new QuickTaskInfo("Annotate, Save, Upload, Copy URL", AfterCaptureTasks.AnnotateImage | AfterCaptureTasks.SaveImageToFile | AfterCaptureTasks.UploadImageToHost, AfterUploadTasks.CopyURLToClipboard),
             new QuickTaskInfo(),
             new QuickTaskInfo("Upload, Copy URL", AfterCaptureTasks.UploadImageToHost, AfterUploadTasks.CopyURLToClipboard),
             new QuickTaskInfo("Save", AfterCaptureTasks.SaveImageToFile),
-            new QuickTaskInfo("Copy image", AfterCaptureTasks.CopyImageToClipboard),
-            new QuickTaskInfo("Annotate", AfterCaptureTasks.AnnotateImage)
+            new QuickTaskInfo("Copy image", AfterCaptureTasks.CopyImageToClipboard)
         };
 
         public QuickTaskInfo()

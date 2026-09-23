@@ -55,7 +55,6 @@ public sealed class NotificationActionButton
     public static List<NotificationActionButton> CreateDefaultButtons() =>
     [
         new(ToastClickAction.CopyImageToClipboard),
-        new(ToastClickAction.AnnotateImage),
         new(ToastClickAction.PinToScreen),
         new(ToastClickAction.Upload),
         new(ToastClickAction.OCR)
@@ -78,6 +77,7 @@ public sealed class NotificationActionButton
 
     public static string GetDefaultIcon(ToastClickAction action) => action switch
     {
+        ToastClickAction.CloseNotification => LucideIcons.x,
         ToastClickAction.AnnotateImage => LucideIcons.pen_line,
         ToastClickAction.CopyImageToClipboard => LucideIcons.copy,
         ToastClickAction.CopyFile => LucideIcons.files,

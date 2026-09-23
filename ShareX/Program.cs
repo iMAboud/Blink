@@ -25,7 +25,6 @@
 
 using ShareX.AvaloniaUI.Integration;
 using ShareX.HelpersLib;
-using ShareX.ImageEditor.Integration;
 using ShareX.Localization;
 using ShareX.UploadersLib;
 using Avalonia.Threading;
@@ -353,7 +352,6 @@ namespace ShareX
 
         private static async Task StartApplication()
         {
-            ImageEditorIntegration.Initialize();
 
             try
             {

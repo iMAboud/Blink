@@ -355,7 +355,36 @@ namespace ShareX
                 }
             }
 
-            NotificationActionButton.EnsureButton(DefaultTaskSettings.GeneralSettings.ToastWindowButtons, ToastClickAction.OCR);
+            if (DefaultTaskSettings?.GeneralSettings?.ToastWindowButtons != null)
+            {
+                DefaultTaskSettings.GeneralSettings.ToastWindowButtons.RemoveAll(b => b == null || b.Action == ToastClickAction.AnnotateImage);
+                NotificationActionButton.EnsureButton(DefaultTaskSettings.GeneralSettings.ToastWindowButtons, ToastClickAction.OCR);
+            }
+
+            if (DefaultTaskSettings?.GeneralSettings != null)
+            {
+                SanitizeToastClickActions(DefaultTaskSettings.GeneralSettings);
+            }
+
+            if (DefaultTaskSettings != null)
+            {
+                DefaultTaskSettings.AfterCaptureJob = DefaultTaskSettings.AfterCaptureJob
+                    .Remove(AfterCaptureTasks.AnnotateImage)
+                    .Remove(AfterCaptureTasks.BeautifyImage)
+                    .Remove(AfterCaptureTasks.AddImageEffects);
+            }
+
+            if (Settings != null)
+            {
+                if (Settings.ThumbnailClickAction == ThumbnailViewClickAction.EditImage)
+                {
+                    Settings.ThumbnailClickAction = ThumbnailViewClickAction.Default;
+                }
+
+                Settings.ActionsToolbarList?.RemoveAll(a => a is HotkeyType.ImageEditor or HotkeyType.ImageBeautifier or HotkeyType.ImageEffects);
+            }
+
+            IntegrationHelpers.CreateEditShellContextMenuButton(false);
         }
 
         public static void HistoryConnect()
@@ -410,11 +439,39 @@ namespace ShareX
 
             foreach (TaskSettings taskSettings in HotkeysConfig.Hotkeys.Select(x => x.TaskSettings))
             {
-                if (taskSettings?.GeneralSettings?.ToastWindowButtons != null)
+                if (taskSettings != null)
                 {
-                    NotificationActionButton.EnsureButton(taskSettings.GeneralSettings.ToastWindowButtons, ToastClickAction.OCR);
+                    taskSettings.AfterCaptureJob = taskSettings.AfterCaptureJob
+                        .Remove(AfterCaptureTasks.AnnotateImage)
+                        .Remove(AfterCaptureTasks.BeautifyImage)
+                        .Remove(AfterCaptureTasks.AddImageEffects);
+
+                    if (taskSettings.GeneralSettings != null)
+                    {
+                        if (taskSettings.GeneralSettings.ToastWindowButtons != null)
+                        {
+                            taskSettings.GeneralSettings.ToastWindowButtons.RemoveAll(b => b == null || b.Action == ToastClickAction.AnnotateImage);
+                            NotificationActionButton.EnsureButton(taskSettings.GeneralSettings.ToastWindowButtons, ToastClickAction.OCR);
+                        }
+
+                        SanitizeToastClickActions(taskSettings.GeneralSettings);
+                    }
                 }
             }
+        }
+
+        private static void SanitizeToastClickActions(TaskSettingsGeneral general)
+        {
+            if (general.ToastWindowLeftClickAction == ToastClickAction.AnnotateImage)
+                general.ToastWindowLeftClickAction = ToastClickAction.OpenFile;
+            if (general.ToastWindowRightClickAction == ToastClickAction.AnnotateImage)
+                general.ToastWindowRightClickAction = ToastClickAction.CloseNotification;
+            if (general.ToastWindowMiddleClickAction == ToastClickAction.AnnotateImage)
+                general.ToastWindowMiddleClickAction = ToastClickAction.Upload;
+            if (general.ToastWindowMouse4ClickAction == ToastClickAction.AnnotateImage)
+                general.ToastWindowMouse4ClickAction = ToastClickAction.CloseNotification;
+            if (general.ToastWindowMouse5ClickAction == ToastClickAction.AnnotateImage)
+                general.ToastWindowMouse5ClickAction = ToastClickAction.CloseNotification;
         }
 
         public static void CleanupHotkeysConfig()

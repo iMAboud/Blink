@@ -73,7 +73,8 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
     public IReadOnlyList<EnumOption<HotkeyType>> HotkeyTypeOptions { get; } = CreateHotkeyTypeOptions();
     public IReadOnlyList<EnumOption<UpdateChannel>> UpdateChannelOptions { get; } = CreateEnumOptions<UpdateChannel>();
     public IReadOnlyList<EnumOption<ThumbnailTitleLocation>> ThumbnailTitleLocationOptions { get; } = CreateEnumOptions<ThumbnailTitleLocation>();
-    public IReadOnlyList<EnumOption<ThumbnailViewClickAction>> ThumbnailClickActionOptions { get; } = CreateEnumOptions<ThumbnailViewClickAction>();
+    public IReadOnlyList<EnumOption<ThumbnailViewClickAction>> ThumbnailClickActionOptions { get; } =
+        CreateEnumOptions<ThumbnailViewClickAction>().Where(x => x.Value != ThumbnailViewClickAction.EditImage).ToArray();
     public IReadOnlyList<EnumOption<ProxyMethod>> ProxyMethodOptions { get; } = CreateEnumOptions<ProxyMethod>();
     public IReadOnlyList<EnumOption<ContentAlignment>> DropAlignmentOptions { get; } =
     [

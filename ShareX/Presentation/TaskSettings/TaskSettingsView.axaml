@@ -7,8 +7,8 @@
              xmlns:controls="using:ShareX.AvaloniaUI.Controls"
              xmlns:theming="using:ShareX.AvaloniaUI.Theming"
              mc:Ignorable="d"
-             d:DesignWidth="950"
-             d:DesignHeight="720"
+             d:DesignWidth="760"
+             d:DesignHeight="700"
              x:Class="ShareX.TaskSettingsView"
              x:DataType="local:TaskSettingsViewModel">
 
@@ -132,15 +132,6 @@
 
             <Grid x:Name="SettingsPages" Grid.Column="1"/>
         </Grid>
-
-        <Border x:Name="ImageEditorToolbarEditorOverlay"
-                ZIndex="100"
-                IsVisible="False"
-                Background="{DynamicResource ShareX.Brush.Overlay.Modal}">
-            <ContentControl x:Name="ImageEditorToolbarEditor"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"/>
-        </Border>
 
         <Border x:Name="ActionEditorOverlay"
                 ZIndex="100"

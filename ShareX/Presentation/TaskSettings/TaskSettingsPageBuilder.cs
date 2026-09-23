@@ -13,13 +13,13 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using ShareX.AvaloniaUI.Controls;
 using ShareX.AvaloniaUI.Theming;
 using ShareX.HelpersLib;
-using ShareX.ImageEditor.Integration;
 using ShareX.Localization;
 using ShareX.ScreenCaptureLib;
 using ShareX.Tools;
@@ -194,8 +194,22 @@ internal sealed class TaskSettingsPageBuilder
         toastOptions.Children.Add(Row(Strings.TaskSettingsWindow_Mouse5Click, EnumCombo(() => general.ToastWindowMouse5ClickAction, value => general.ToastWindowMouse5ClickAction = value)));
         toastOptions.Children.Add(Row(Strings.TaskSettingsWindow_NotificationButtonSize, Number(() => general.ToastWindowButtonSize,
             value => general.ToastWindowButtonSize = (int)value, 16, 128)));
-        toastOptions.Children.Add(Row(Strings.TaskSettingsWindow_NotificationButtonsLabel, Button(Strings.TaskSettingsWindow_ConfigureWithEllipsis, () =>
-            _host.ShowNotificationButtonsEditor(general.ToastWindowButtons, buttons => general.ToastWindowButtons = buttons))));
+
+        StackPanel buttonsPanel = new()
+        {
+            Spacing = 6,
+            HorizontalAlignment = HorizontalAlignment.Left
+        };
+        buttonsPanel.Children.Add(BuildNotificationQuickActionButtonsGrid(general, out Action refreshGrid));
+        Button configureButton = Button(Strings.TaskSettingsWindow_ConfigureWithEllipsis, () =>
+            _host.ShowNotificationButtonsEditor(general.ToastWindowButtons, buttons =>
+            {
+                general.ToastWindowButtons = buttons;
+                refreshGrid();
+            }));
+        configureButton.HorizontalAlignment = HorizontalAlignment.Left;
+        buttonsPanel.Children.Add(configureButton);
+        toastOptions.Children.Add(Row(Strings.TaskSettingsWindow_NotificationButtonsLabel, buttonsPanel, VerticalAlignment.Top));
         toastOptions.Children.Add(Check(Strings.TaskSettingsWindow_AutomaticallyHideOnScreenCapture, () => general.ToastWindowAutoHide, value => general.ToastWindowAutoHide = value));
         toastOptions.Children.Add(Check(Strings.TaskSettingsWindow_DisableToastNotificationsOnFullscreen, () => general.DisableNotificationsOnFullscreen, value => general.DisableNotificationsOnFullscreen = value));
         BindVisible(toastOptions, showToast);
@@ -203,24 +217,7 @@ internal sealed class TaskSettingsPageBuilder
         return Page("general", Strings.TaskSettingsWindow_General, LucideIcons.settings_2,
             OverrideCard(_generalOverride, Strings.TaskSettingsWindow_OverrideGeneralSettings),
             EnabledCard(_generalOverride, Strings.TaskSettingsWindow_Sounds,
-                BuildSoundOptionRow(
-                    Strings.TaskSettingsWindow_PlaySoundAfterCaptureIsMade,
-                    () => general.PlaySoundAfterCapture, value => general.PlaySoundAfterCapture = value,
-                    () => general.UseCustomCaptureSound, value => general.UseCustomCaptureSound = value,
-                    () => general.CustomCaptureSoundPath, value => general.CustomCaptureSoundPath = value,
-                    () => Properties.Resources.CaptureSound),
-                BuildSoundOptionRow(
-                    Strings.TaskSettingsWindow_PlaySoundAfterTaskIsCompleted,
-                    () => general.PlaySoundAfterUpload, value => general.PlaySoundAfterUpload = value,
-                    () => general.UseCustomTaskCompletedSound, value => general.UseCustomTaskCompletedSound = value,
-                    () => general.CustomTaskCompletedSoundPath, value => general.CustomTaskCompletedSoundPath = value,
-                    () => Properties.Resources.TaskCompletedSound),
-                BuildSoundOptionRow(
-                    Strings.TaskSettingsWindow_PlaySoundAfterActionIsCompleted,
-                    () => general.PlaySoundAfterAction, value => general.PlaySoundAfterAction = value,
-                    () => general.UseCustomActionCompletedSound, value => general.UseCustomActionCompletedSound = value,
-                    () => general.CustomActionCompletedSoundPath, value => general.CustomActionCompletedSoundPath = value,
-                    () => Properties.Resources.ActionCompletedSound)),
+                BuildSoundsSection(general)),
             EnabledCard(_generalOverride, Strings.TaskSettingsWindow_ToastNotification,
                 Check(Strings.TaskSettingsWindow_ShowToastNotificationAfterTaskIsCompleted, showToast),
                 toastOptions));
@@ -497,14 +494,16 @@ internal sealed class TaskSettingsPageBuilder
     private BoundValue<bool> OverrideValue(Func<bool> getter, Action<bool> setter) =>
         _isDefault ? new BoundValue<bool>(true, _ => { }) : new BoundValue<bool>(getter(), setter);
 
-    private static Grid Row(string label, Control editor)
+    private static Grid Row(string label, Control editor, VerticalAlignment labelVerticalAlignment = VerticalAlignment.Center)
     {
         Grid row = new()
         {
             ColumnDefinitions = new ColumnDefinitions("210,*"),
             ColumnSpacing = 8
         };
-        row.Children.Add(Label(label));
+        TextBlock l = Label(label);
+        l.VerticalAlignment = labelVerticalAlignment;
+        row.Children.Add(l);
         Grid.SetColumn(editor, 1);
         row.Children.Add(editor);
         return row;
@@ -677,8 +676,20 @@ internal sealed class TaskSettingsPageBuilder
 
     private static BoundValue<decimal?> NumericValue(decimal initial, Action<decimal?> setter) => new(initial, setter);
 
-    private static ComboBox EnumCombo<T>(Func<T> getter, Action<T> setter) where T : struct, Enum =>
-        ObjectCombo(Enum.GetValues<T>(), getter, setter, value => ((Enum)(object)value).GetLocalizedDescription());
+    private static ComboBox EnumCombo<T>(Func<T> getter, Action<T> setter) where T : struct, Enum
+    {
+        IEnumerable<T> values = Enum.GetValues<T>();
+        if (typeof(T) == typeof(ToastClickAction))
+        {
+            values = values.Where(x => (ToastClickAction)(object)x != ToastClickAction.AnnotateImage);
+        }
+        else if (typeof(T) == typeof(ThumbnailViewClickAction))
+        {
+            values = values.Where(x => (ThumbnailViewClickAction)(object)x != ThumbnailViewClickAction.EditImage);
+        }
+
+        return ObjectCombo(values, getter, setter, value => ((Enum)(object)value).GetLocalizedDescription());
+    }
 
     private static Button TaskMenu(Func<HotkeyType> getter, Action<HotkeyType> setter)
     {
@@ -734,7 +745,9 @@ internal sealed class TaskSettingsPageBuilder
 
         button.Click += (_, _) =>
         {
-            List<HotkeyType> tasks = Helpers.GetEnums<HotkeyType>().ToList();
+            List<HotkeyType> tasks = Helpers.GetEnums<HotkeyType>()
+                .Where(task => task is not (HotkeyType.ImageEditor or HotkeyType.ImageBeautifier or HotkeyType.ImageEffects))
+                .ToList();
             List<MenuItem> rootItems = [CreateTaskMenuItem(HotkeyType.None, getter(), SelectTask)];
 
             foreach (IGrouping<string, HotkeyType> category in tasks
@@ -994,6 +1007,144 @@ internal sealed class TaskSettingsPageBuilder
         return icon;
     }
 
+    private static Control BuildNotificationQuickActionButtonsGrid(TaskSettingsGeneral general, out Action refreshGrid)
+    {
+        ToastClickAction[] actions =
+        [
+            ToastClickAction.CloseNotification,
+            ToastClickAction.CopyImageToClipboard,
+            ToastClickAction.CopyFile,
+            ToastClickAction.CopyFilePath,
+            ToastClickAction.CopyUrl,
+            ToastClickAction.OpenFile,
+            ToastClickAction.OpenFolder,
+            ToastClickAction.OpenUrl,
+            ToastClickAction.Upload,
+            ToastClickAction.PinToScreen,
+            ToastClickAction.DeleteFile,
+            ToastClickAction.OCR
+        ];
+
+        UniformGrid panel = new()
+        {
+            Columns = 6,
+            Rows = 2,
+            HorizontalAlignment = HorizontalAlignment.Left
+        };
+
+        List<Action> updaters = [];
+
+        foreach (ToastClickAction action in actions)
+        {
+            TextBlock iconText = new()
+            {
+                Text = NotificationActionButton.GetDefaultIcon(action),
+                FontFamily = (FontFamily)Application.Current!.FindResource("ShareX.FontFamily.Icon")!,
+                FontSize = 18,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            Button button = new()
+            {
+                Content = iconText,
+                Width = 36,
+                Height = 36,
+                Padding = new Thickness(0),
+                Margin = new Thickness(2),
+                CornerRadius = new CornerRadius(7),
+                Cursor = new Cursor(StandardCursorType.Hand)
+            };
+
+            ToolTip.SetPlacement(button, PlacementMode.Top);
+            ToolTip.SetVerticalOffset(button, -4);
+            ToolTip.SetShowDelay(button, 200);
+
+            void UpdateVisual()
+            {
+                bool isEnabled = general.ToastWindowButtons != null && general.ToastWindowButtons.Any(b => b != null && b.Action == action);
+                if (isEnabled)
+                {
+                    button.Background = (IBrush)Application.Current!.FindResource("ShareX.Brush.Accent")!;
+                    button.BorderBrush = (IBrush)Application.Current!.FindResource("ShareX.Brush.Accent.Start")!;
+                    button.BorderThickness = new Thickness(1);
+                    button.Opacity = 1.0;
+                    iconText.Foreground = (IBrush)Application.Current!.FindResource("ShareX.Brush.Accent.Foreground")!;
+                    ToolTip.SetTip(button, $"{action.GetLocalizedDescription()} (Enabled)");
+                }
+                else
+                {
+                    button.Background = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255));
+                    button.BorderBrush = new SolidColorBrush(Color.FromArgb(25, 255, 255, 255));
+                    button.BorderThickness = new Thickness(1);
+                    button.Opacity = 0.32;
+                    iconText.Foreground = new SolidColorBrush(Color.FromArgb(140, 255, 255, 255));
+                    ToolTip.SetTip(button, $"{action.GetLocalizedDescription()} (Disabled)");
+                }
+            }
+
+            button.PointerEntered += (_, _) =>
+            {
+                bool isEnabled = general.ToastWindowButtons != null && general.ToastWindowButtons.Any(b => b != null && b.Action == action);
+                if (!isEnabled)
+                {
+                    button.Opacity = 0.65;
+                }
+            };
+
+            button.PointerExited += (_, _) =>
+            {
+                bool isEnabled = general.ToastWindowButtons != null && general.ToastWindowButtons.Any(b => b != null && b.Action == action);
+                if (!isEnabled)
+                {
+                    button.Opacity = 0.32;
+                }
+            };
+
+            button.Click += (_, _) =>
+            {
+                bool isEnabled = general.ToastWindowButtons != null && general.ToastWindowButtons.Any(b => b != null && b.Action == action);
+                general.ToastWindowButtons ??= [];
+
+                if (isEnabled)
+                {
+                    general.ToastWindowButtons.RemoveAll(b => b != null && b.Action == action);
+                }
+                else
+                {
+                    general.ToastWindowButtons.Add(new NotificationActionButton(action));
+                }
+
+                UpdateVisual();
+            };
+
+            UpdateVisual();
+            updaters.Add(UpdateVisual);
+            panel.Children.Add(button);
+        }
+
+        refreshGrid = () =>
+        {
+            foreach (Action update in updaters)
+            {
+                update();
+            }
+        };
+
+        Border container = new()
+        {
+            Background = new SolidColorBrush(Color.FromArgb(18, 255, 255, 255)),
+            BorderBrush = new SolidColorBrush(Color.FromArgb(30, 255, 255, 255)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(8),
+            Padding = new Thickness(4),
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Child = panel
+        };
+
+        return container;
+    }
+
     private static ComboBox ObjectCombo<T>(IEnumerable<T> values, Func<T> getter, Action<T> setter, Func<T, string>? title = null)
     {
         ChoiceOption<T>[] options = values.Select(value => new ChoiceOption<T>(value, title?.Invoke(value) ?? value?.ToString() ?? string.Empty)).ToArray();
@@ -1132,7 +1283,44 @@ internal sealed class TaskSettingsPageBuilder
         return list;
     }
 
-    private Control BuildSoundOptionRow(
+    private Control BuildSoundsSection(TaskSettingsGeneral general)
+    {
+        Grid grid = new()
+        {
+            ColumnDefinitions = new ColumnDefinitions("Auto,Auto,Auto"),
+            RowDefinitions = new RowDefinitions("Auto,Auto,Auto"),
+            ColumnSpacing = 8,
+            RowSpacing = 4,
+            HorizontalAlignment = HorizontalAlignment.Left
+        };
+
+        AddSoundOptionRow(grid, 0,
+            Strings.TaskSettingsWindow_PlaySoundAfterCaptureIsMade,
+            () => general.PlaySoundAfterCapture, value => general.PlaySoundAfterCapture = value,
+            () => general.UseCustomCaptureSound, value => general.UseCustomCaptureSound = value,
+            () => general.CustomCaptureSoundPath, value => general.CustomCaptureSoundPath = value,
+            () => Properties.Resources.CaptureSound);
+
+        AddSoundOptionRow(grid, 1,
+            Strings.TaskSettingsWindow_PlaySoundAfterTaskIsCompleted,
+            () => general.PlaySoundAfterUpload, value => general.PlaySoundAfterUpload = value,
+            () => general.UseCustomTaskCompletedSound, value => general.UseCustomTaskCompletedSound = value,
+            () => general.CustomTaskCompletedSoundPath, value => general.CustomTaskCompletedSoundPath = value,
+            () => Properties.Resources.TaskCompletedSound);
+
+        AddSoundOptionRow(grid, 2,
+            Strings.TaskSettingsWindow_PlaySoundAfterActionIsCompleted,
+            () => general.PlaySoundAfterAction, value => general.PlaySoundAfterAction = value,
+            () => general.UseCustomActionCompletedSound, value => general.UseCustomActionCompletedSound = value,
+            () => general.CustomActionCompletedSoundPath, value => general.CustomActionCompletedSoundPath = value,
+            () => Properties.Resources.ActionCompletedSound);
+
+        return grid;
+    }
+
+    private void AddSoundOptionRow(
+        Grid grid,
+        int rowIndex,
         string checkLabel,
         Func<bool> checkGetter,
         Action<bool> checkSetter,
@@ -1144,6 +1332,7 @@ internal sealed class TaskSettingsPageBuilder
     {
         CheckBox checkBox = Check(checkLabel, checkGetter, checkSetter);
         checkBox.VerticalAlignment = VerticalAlignment.Center;
+        checkBox.Margin = new Thickness(0, 0, 8, 0);
 
         List<ChoiceOption<string>> options = GetAvailableSoundOptions().ToList();
         string currentPath = useCustomGetter() ? (pathGetter() ?? "") : "";
@@ -1159,8 +1348,8 @@ internal sealed class TaskSettingsPageBuilder
         {
             ItemsSource = options,
             SelectedItem = initialSelected,
-            MinWidth = 200,
-            MaxWidth = 260,
+            Width = 175,
+            MinWidth = 0,
             VerticalAlignment = VerticalAlignment.Center
         };
         comboBox.Classes.Add("form-control");
@@ -1232,21 +1421,18 @@ internal sealed class TaskSettingsPageBuilder
             TaskHelpers.PlaySound(key, defaultSoundGetter());
         };
 
-        Grid row = new()
-        {
-            ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto"),
-            ColumnSpacing = 8,
-            Margin = new Thickness(0, 2)
-        };
+        Grid.SetRow(checkBox, rowIndex);
         Grid.SetColumn(checkBox, 0);
+
+        Grid.SetRow(comboBox, rowIndex);
         Grid.SetColumn(comboBox, 1);
+
+        Grid.SetRow(previewBtn, rowIndex);
         Grid.SetColumn(previewBtn, 2);
 
-        row.Children.Add(checkBox);
-        row.Children.Add(comboBox);
-        row.Children.Add(previewBtn);
-
-        return row;
+        grid.Children.Add(checkBox);
+        grid.Children.Add(comboBox);
+        grid.Children.Add(previewBtn);
     }
 }
 

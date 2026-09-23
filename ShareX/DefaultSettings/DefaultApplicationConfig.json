@@ -42,12 +42,6 @@
           "DismissNotification": true
         },
         {
-          "Action": "AnnotateImage",
-          "Label": null,
-          "Icon": null,
-          "DismissNotification": true
-        },
-        {
           "Action": "PinToScreen",
           "Label": null,
           "Icon": null,
@@ -364,233 +358,7 @@
         "AutoStartAnalyze": true,
         "AutoCopyResult": false
       },
-      "ImageEditorOptions": {
-        "LastUsedAnnotationTool": "Spotlight",
-        "RememberWindowState": true,
-        "IsWindowMaximized": true,
-        "WindowWidth": 1280.0,
-        "WindowHeight": 720.0,
-        "ShowExitConfirmation": true,
-        "ZoomToFitOnOpen": false,
-        "QuickCrop": true,
-        "AutoCloseEditorOnTask": false,
-        "AutoCopyImageToClipboard": false,
-        "ShowInsertImageDialog": true,
-        "ShowNotifications": true,
-        "ToolbarItems": [
-          {
-            "Id": "File",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": ""
-          },
-          {
-            "Id": "Select",
-            "BeginGroup": true,
-            "IsVisible": true,
-            "Hotkey": "V"
-          },
-          {
-            "Id": "Rectangle",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": "R"
-          },
-          {
-            "Id": "Ellipse",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": "E"
-          },
-          {
-            "Id": "Line",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": "L"
-          },
-          {
-            "Id": "Arrow",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": "A"
-          },
-          {
-            "Id": "Freehand",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": "F"
-          },
-          {
-            "Id": "Text",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": "T"
-          },
-          {
-            "Id": "SpeechBalloon",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": "O"
-          },
-          {
-            "Id": "Step",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": "N"
-          },
-          {
-            "Id": "Image",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": "I"
-          },
-          {
-            "Id": "Emoji",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": "J"
-          },
-          {
-            "Id": "Cursor",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": "K"
-          },
-          {
-            "Id": "Highlight",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": "H"
-          },
-          {
-            "Id": "SmartEraser",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": "W"
-          },
-          {
-            "Id": "Blur",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": "B"
-          },
-          {
-            "Id": "Pixelate",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": "P"
-          },
-          {
-            "Id": "Magnify",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": "M"
-          },
-          {
-            "Id": "Spotlight",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": "S"
-          },
-          {
-            "Id": "Crop",
-            "BeginGroup": true,
-            "IsVisible": true,
-            "Hotkey": "C"
-          },
-          {
-            "Id": "CutOut",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": "U"
-          },
-          {
-            "Id": "Background",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": ""
-          },
-          {
-            "Id": "ImageEffects",
-            "BeginGroup": false,
-            "IsVisible": true,
-            "Hotkey": ""
-          }
-        ],
-        "BorderColorHex": "#FFF23C3C",
-        "FillColorHex": "#FFF23C3C",
-        "Thickness": 4,
-        "CornerRadius": 4,
-        "Shadow": false,
-        "ShadowColorHex": "#80000000",
-        "ShadowBlurRadius": 4.0,
-        "ShadowOpacity": 1.0,
-        "ShadowOffsetX": 3.0,
-        "ShadowOffsetY": 3.0,
-        "BorderStyle": "Solid",
-        "ArrowStyle": "Classic",
-        "CursorType": "Default",
-        "TextBorderColorHex": "#FFF23C3C",
-        "TextTextColorHex": "#FFFAFAFA",
-        "TextThickness": 8,
-        "TextFontSize": 48.0,
-        "TextFontFamily": "Segoe UI",
-        "TextHorizontalAlignment": "Center",
-        "TextBold": true,
-        "TextItalic": false,
-        "SpeechBalloonBorderColorHex": "#00FFFFFF",
-        "SpeechBalloonFillColorHex": "#FFF23C3C",
-        "SpeechBalloonTextColorHex": "#FFFAFAFA",
-        "SpeechBalloonThickness": 4,
-        "SpeechBalloonFontSize": 48.0,
-        "SpeechBalloonFontFamily": "Segoe UI",
-        "SpeechBalloonTextHorizontalAlignment": "Center",
-        "SpeechBalloonTextBold": true,
-        "SpeechBalloonTextItalic": false,
-        "SpeechBalloonTail": true,
-        "StepBorderColorHex": "#00FFFFFF",
-        "StepFillColorHex": "#FFF23C3C",
-        "StepTextColorHex": "#FFFAFAFA",
-        "StepThickness": 4,
-        "StepFontSize": 30.0,
-        "StepTextBold": true,
-        "StepType": "Numeric",
-        "StepTail": true,
-        "HighlightFillColorHex": "#FFFFFF00",
-        "BlurStrength": 30.0,
-        "PixelateStrength": 20.0,
-        "MagnifierStrength": 2.0,
-        "MagnifierEllipse": false,
-        "SpotlightStrength": 30.0,
-        "SpotlightBlur": 0.0,
-        "SpotlightEllipse": false,
-        "BackgroundMargin": 80.0,
-        "BackgroundPadding": 40.0,
-        "BackgroundSmartPadding": true,
-        "BackgroundRoundedCorner": 20.0,
-        "BackgroundShadowRadius": 30.0,
-        "BackgroundType": "Transparent",
-        "BackgroundGradientColor1Hex": "#FFDD2476",
-        "BackgroundGradientColor2Hex": "#FFFF512F",
-        "BackgroundColorHex": "#FF222222",
-        "BackgroundImagePath": "",
-        "RecentImageFiles": [],
-        "MaxRecentImageFiles": 10,
-        "RecentEffects": [
-          "liquify_push_smudge"
-        ],
-        "FavoriteEffects": [
-          "resize_image",
-          "resize_canvas",
-          "crop_image",
-          "auto_crop_image",
-          "rotate_90_clockwise",
-          "rotate_90_counter_clockwise",
-          "rotate_180",
-          "flip_horizontal",
-          "flip_vertical"
-        ]
-      },
+      "ImageEditorOptions": {},
       "BackgroundRemoverOptions": {
         "SelectedModelFileName": "",
         "SelectedDevice": "Auto"
@@ -685,11 +453,6 @@
       "AfterUploadTasks": "None"
     },
     {
-      "Name": "Annotate, Save, Upload, Copy URL",
-      "AfterCaptureTasks": "AnnotateImage, SaveImageToFile, UploadImageToHost",
-      "AfterUploadTasks": "CopyURLToClipboard"
-    },
-    {
       "Name": null,
       "AfterCaptureTasks": "None",
       "AfterUploadTasks": "None"
@@ -707,11 +470,6 @@
     {
       "Name": "Copy image",
       "AfterCaptureTasks": "CopyImageToClipboard",
-      "AfterUploadTasks": "None"
-    },
-    {
-      "Name": "Annotate",
-      "AfterCaptureTasks": "AnnotateImage",
       "AfterUploadTasks": "None"
     }
   ],

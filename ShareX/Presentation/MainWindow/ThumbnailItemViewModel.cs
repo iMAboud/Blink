@@ -85,8 +85,7 @@ internal sealed class ThumbnailItemViewModel : INotifyPropertyChanged, IDisposab
                 ThumbnailViewClickAction.OpenFile => !string.IsNullOrEmpty(filePath) && File.Exists(filePath),
                 ThumbnailViewClickAction.OpenFolder => !string.IsNullOrEmpty(filePath),
                 ThumbnailViewClickAction.OpenURL => !string.IsNullOrWhiteSpace(info?.Result?.ToString()),
-                ThumbnailViewClickAction.EditImage => !string.IsNullOrEmpty(filePath) &&
-                    File.Exists(filePath) && FileHelpers.IsImageFile(filePath),
+                ThumbnailViewClickAction.EditImage => false,
                 _ => false
             };
         }

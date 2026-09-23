@@ -379,7 +379,6 @@ namespace ShareX
 
         public void EditImage()
         {
-            if (IsItemSelected && SelectedItem.IsImageFile) TaskHelpers.AnnotateImageFromFile(SelectedItem.Info.FilePath);
         }
 
         public void TrimVideo()

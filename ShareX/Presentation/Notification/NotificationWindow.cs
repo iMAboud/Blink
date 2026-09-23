@@ -150,8 +150,8 @@ public partial class NotificationWindow : Window
         _config = config;
 
         LoadPreview(config);
-        ApplyContent(config);
         BuildActionButtons(config);
+        ApplyContent(config);
         UpdateHoverState(false);
 
         if (IsVisible)
@@ -223,7 +223,7 @@ public partial class NotificationWindow : Window
         ImageBodyText.IsVisible = hasText;
 
         NotificationCard.Background = hasImage
-            ? Brushes.Transparent
+            ? new SolidColorBrush(Avalonia.Media.Color.FromArgb(240, 27, 27, 27))
             : new SolidColorBrush(ToAvaloniaColor(config.BackgroundColor));
         TitleText.Foreground = new SolidColorBrush(ToAvaloniaColor(config.TitleColor));
         BodyText.Foreground = new SolidColorBrush(ToAvaloniaColor(config.TextColor));
@@ -237,11 +237,17 @@ public partial class NotificationWindow : Window
         }
         else
         {
-            // Overlay content must not participate in the notification's desired
-            // width. Keep image notifications anchored to the preview and let the
-            // caption wrap/trim inside that fixed surface.
-            NotificationCard.Width = PreviewImage.Width + 2;
+            int buttonSize = Math.Clamp(config.ActionButtonSize, 16, 128);
+            int visibleButtonCount = ActionButtons.Children.Count;
+            int buttonsPerRow = Math.Min(visibleButtonCount, 6);
+            double minButtonsWidth = visibleButtonCount > 0 ? (buttonsPerRow * (buttonSize + 6) + 20) : 0;
+
+            int rows = visibleButtonCount > 0 ? (int)Math.Ceiling(visibleButtonCount / (double)buttonsPerRow) : 0;
+            double minButtonsHeight = rows > 0 ? (rows * (buttonSize + 6) + 20) : 0;
+
+            NotificationCard.Width = Math.Max(PreviewImage.Width + 2, minButtonsWidth);
             NotificationCard.Height = double.NaN;
+            NotificationCard.MinHeight = Math.Max(PreviewImage.Height + 2, minButtonsHeight + (hasCaption ? 50 : 16));
         }
     }
 
@@ -253,7 +259,7 @@ public partial class NotificationWindow : Window
 
         foreach (NotificationActionButton definition in config.ActionButtons ?? [])
         {
-            if (definition == null || !CanExecute(definition.Action, config))
+            if (definition == null || definition.Action == ToastClickAction.AnnotateImage || !CanExecute(definition.Action, config))
             {
                 continue;
             }
@@ -570,10 +576,6 @@ public partial class NotificationWindow : Window
             switch (action)
             {
                 case ToastClickAction.AnnotateImage:
-                    if (!string.IsNullOrEmpty(config.FilePath) && FileHelpers.IsImageFile(config.FilePath))
-                    {
-                        TaskHelpers.AnnotateImageFromFile(config.FilePath);
-                    }
                     break;
                 case ToastClickAction.CopyImageToClipboard:
                     if (!string.IsNullOrEmpty(config.FilePath))
@@ -647,13 +649,18 @@ public partial class NotificationWindow : Window
 
     private static bool CanExecute(ToastClickAction action, NotificationWindowConfig config)
     {
+        if (action == ToastClickAction.AnnotateImage)
+        {
+            return false;
+        }
+
         bool hasFile = !string.IsNullOrWhiteSpace(config.FilePath);
         bool hasImageFile = hasFile && FileHelpers.IsImageFile(config.FilePath);
         bool hasTarget = hasFile || !string.IsNullOrWhiteSpace(config.URL);
 
         return action switch
         {
-            ToastClickAction.AnnotateImage or ToastClickAction.CopyImageToClipboard or
+            ToastClickAction.CopyImageToClipboard or
                 ToastClickAction.PinToScreen or ToastClickAction.OCR => hasImageFile,
             ToastClickAction.CopyFile or ToastClickAction.CopyFilePath or ToastClickAction.OpenFile or
                 ToastClickAction.OpenFolder or ToastClickAction.Upload or ToastClickAction.DeleteFile => hasFile,

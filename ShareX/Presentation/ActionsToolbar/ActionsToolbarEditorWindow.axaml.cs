@@ -42,7 +42,10 @@ public partial class ActionsToolbarEditorWindow : Window
         Program.Settings.ActionsToolbarList ??= [];
         foreach (HotkeyType action in Program.Settings.ActionsToolbarList)
         {
-            _items.Add(new ActionsToolbarItem(action));
+            if (action is not (HotkeyType.ImageEditor or HotkeyType.ImageBeautifier or HotkeyType.ImageEffects))
+            {
+                _items.Add(new ActionsToolbarItem(action));
+            }
         }
 
         ActionList.ItemsSource = _items;
@@ -66,6 +69,11 @@ public partial class ActionsToolbarEditorWindow : Window
 
         foreach (HotkeyType action in Helpers.GetEnums<HotkeyType>())
         {
+            if (action is HotkeyType.ImageEditor or HotkeyType.ImageBeautifier or HotkeyType.ImageEffects)
+            {
+                continue;
+            }
+
             EnumInfo info = new(action);
             string title = action == HotkeyType.None
                 ? Strings.ActionsToolbarEditorWindow_Separator

@@ -26,7 +26,6 @@
 using Newtonsoft.Json;
 using ShareX.AvaloniaUI.Windows;
 using ShareX.HelpersLib;
-using ShareX.ImageEditor.Integration;
 using ShareX.ScreenCaptureLib;
 using ShareX.Tools;
 using ShareX.UploadersLib;
@@ -557,5 +556,9 @@ namespace ShareX
     {
         public string Name { get; set; } = "Default";
         public static ImageEffectPreset GetDefaultPreset() => new ImageEffectPreset();
+    }
+
+    public class ImageEditorOptions
+    {
     }
 }

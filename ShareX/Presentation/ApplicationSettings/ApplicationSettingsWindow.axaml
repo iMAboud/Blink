@@ -6,7 +6,6 @@
         xmlns:res="using:ShareX.Localization"
         xmlns:controls="using:ShareX.AvaloniaUI.Controls"
         xmlns:theming="using:ShareX.AvaloniaUI.Theming"
-        xmlns:imageEditorControls="using:ShareX.ImageEditor.Presentation.Controls"
         mc:Ignorable="d"
         d:DesignWidth="950"
         d:DesignHeight="720"
@@ -207,7 +206,7 @@
                                           ColumnSpacing="8"
                                           IsVisible="{Binding CanEditAccentColor}">
                                         <TextBlock Text="{x:Static res:Strings.ApplicationSettingsWindow_AccentColorLabel}" VerticalAlignment="Center" FontWeight="Normal"/>
-                                        <imageEditorControls:ColorPickerDropdown Grid.Column="1"
+                                        <controls:ColorPickerDropdown Grid.Column="1"
                                                                                  SelectedColorValue="{Binding AccentColor, Mode=TwoWay}"
                                                                                  HorizontalAlignment="Left"
                                                                                  MinWidth="130"

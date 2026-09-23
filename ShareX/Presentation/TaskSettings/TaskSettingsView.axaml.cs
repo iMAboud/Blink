@@ -16,9 +16,6 @@ using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using ShareX.AvaloniaUI.Theming;
 using ShareX.HelpersLib;
-using ShareX.ImageEditor.Integration;
-using ShareX.ImageEditor.Presentation.ViewModels;
-using ShareX.ImageEditor.Presentation.Views;
 using ShareX.Localization;
 using System;
 using System.Collections.Generic;
@@ -95,30 +92,6 @@ public partial class TaskSettingsView : UserControl, ITaskSettingsHost
         {
             page.IsVisible = id == pageId;
         }
-    }
-
-    public void ShowImageEditorToolbarEditor(ImageEditorOptions options)
-    {
-        ImageEditorIntegration.Initialize();
-
-        ToolbarCustomizationDialogView view = new();
-        view.DataContext = new ToolbarCustomizationDialogViewModel(
-            ToolbarCustomizationItemViewModel.CreateFromOptions(options.ToolbarItems),
-            items =>
-            {
-                options.ToolbarItems = items.Select(item => item.ToOptions()).ToList();
-                HideImageEditorToolbarEditor();
-            },
-            HideImageEditorToolbarEditor);
-
-        ImageEditorToolbarEditor.Content = view;
-        ImageEditorToolbarEditorOverlay.IsVisible = true;
-    }
-
-    private void HideImageEditorToolbarEditor()
-    {
-        ImageEditorToolbarEditorOverlay.IsVisible = false;
-        ImageEditorToolbarEditor.Content = null;
     }
 
     public void ShowActionEditor(ExternalProgram? action, Action<ExternalProgram> saved)
@@ -226,12 +199,7 @@ public partial class TaskSettingsView : UserControl, ITaskSettingsHost
             return;
         }
 
-        if (ImageEditorToolbarEditorOverlay.IsVisible)
-        {
-            HideImageEditorToolbarEditor();
-            e.Handled = true;
-        }
-        else if (NotificationButtonsEditorOverlay.IsVisible)
+        if (NotificationButtonsEditorOverlay.IsVisible)
         {
             HideNotificationButtonsEditor();
             e.Handled = true;
@@ -340,7 +308,7 @@ public partial class TaskSettingsView : UserControl, ITaskSettingsHost
 
         foreach (NotificationActionButton button in buttons ?? [])
         {
-            if (button != null && Enum.IsDefined(button.Action) && addedActions.Add(button.Action))
+            if (button != null && Enum.IsDefined(button.Action) && button.Action != ToastClickAction.AnnotateImage && addedActions.Add(button.Action))
             {
                 _notificationButtonItems.Add(new NotificationActionItem(button.Clone()));
             }
@@ -365,7 +333,7 @@ public partial class TaskSettingsView : UserControl, ITaskSettingsHost
         HashSet<ToastClickAction> selectedActions = _notificationButtonItems.Select(item => item.Action).ToHashSet();
         List<MenuItem> items = [];
 
-        foreach (ToastClickAction action in Helpers.GetEnums<ToastClickAction>().Where(action => !selectedActions.Contains(action)))
+        foreach (ToastClickAction action in Helpers.GetEnums<ToastClickAction>().Where(action => action != ToastClickAction.AnnotateImage && !selectedActions.Contains(action)))
         {
             MenuItem item = new()
             {
@@ -448,7 +416,7 @@ public partial class TaskSettingsView : UserControl, ITaskSettingsHost
         int index = SelectedNotificationButton == null
             ? -1
             : _notificationButtonItems.IndexOf(SelectedNotificationButton);
-        NotificationButtonAddButton.IsEnabled = _notificationButtonItems.Count < Enum.GetValues<ToastClickAction>().Length;
+        NotificationButtonAddButton.IsEnabled = _notificationButtonItems.Count < Helpers.GetEnums<ToastClickAction>().Count(a => a != ToastClickAction.AnnotateImage);
         NotificationButtonRemoveButton.IsEnabled = index >= 0;
         NotificationButtonMoveUpButton.IsEnabled = index > 0;
         NotificationButtonMoveDownButton.IsEnabled = index >= 0 && index < _notificationButtonItems.Count - 1;

@@ -11,8 +11,6 @@
 
 using Avalonia.Platform.Storage;
 using ShareX.HelpersLib;
-using ShareX.ImageEditor.Integration;
-using ShareX.ImageEditor.Presentation.ViewModels;
 using System;
 using System.Collections.Generic;
 
@@ -24,5 +22,4 @@ public interface ITaskSettingsHost
     IStorageProvider? StorageProvider { get; }
     void ShowNotificationButtonsEditor(List<NotificationActionButton> buttons, Action<List<NotificationActionButton>> onSave);
     void ShowActionEditor(ExternalProgram? action, Action<ExternalProgram> onSave);
-    void ShowImageEditorToolbarEditor(ImageEditorOptions options);
 }
