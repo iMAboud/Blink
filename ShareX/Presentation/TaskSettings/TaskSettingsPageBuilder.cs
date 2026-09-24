@@ -166,14 +166,22 @@ internal sealed class TaskSettingsPageBuilder
         BindEnabled(browseFolder, folderOverride);
         Grid folderRow = InputWithButton(folderText, browseFolder);
 
-        return Page("task", Strings.TaskSettingsWindow_Task, LucideIcons.keyboard,
+        List<Control> taskCards = [
             Card(Strings.TaskSettingsWindow_Task, Row(Strings.TaskSettingsWindow_TaskLabel, TaskMenu(() => _settings.Job, value => _settings.Job = value)),
                 Row(Strings.TaskSettingsWindow_Description, Text(() => _settings.Description, value => _settings.Description = value))),
             Card(Strings.TaskSettingsWindow_AfterCaptureTasks, Check(Strings.TaskSettingsWindow_OverrideAfterCaptureTasks, afterCaptureOverride), afterCapture),
             Card(Strings.TaskSettingsWindow_AfterUploadTasks, Check(Strings.TaskSettingsWindow_OverrideAfterUploadTasks, afterUploadOverride), afterUpload),
-            Card(Strings.TaskSettingsWindow_Destinations, Check(Strings.TaskSettingsWindow_OverrideDestinations, destinationsOverride), destinations),
-            Card(Strings.TaskSettingsWindow_UploaderAccounts, accountControls.ToArray()),
-            Card(Strings.TaskSettingsWindow_ScreenshotsFolder, Check(Strings.TaskSettingsWindow_OverrideScreenshotsFolder, folderOverride), folderRow));
+            Card(Strings.TaskSettingsWindow_Destinations, Check(Strings.TaskSettingsWindow_OverrideDestinations, destinationsOverride), destinations)
+        ];
+
+        if (accountControls.Count > 0)
+        {
+            taskCards.Add(Card(Strings.TaskSettingsWindow_UploaderAccounts, accountControls.ToArray()));
+        }
+
+        taskCards.Add(Card(Strings.TaskSettingsWindow_ScreenshotsFolder, Check(Strings.TaskSettingsWindow_OverrideScreenshotsFolder, folderOverride), folderRow));
+
+        return Page("task", Strings.TaskSettingsWindow_Task, LucideIcons.keyboard, taskCards.ToArray());
     }
 
     private Control BuildGeneralPage()
@@ -722,10 +730,10 @@ internal sealed class TaskSettingsPageBuilder
         Button button = new()
         {
             Content = content,
-            MinWidth = 250,
+            MinWidth = 200,
             MinHeight = 32,
             Padding = new Thickness(8, 4),
-            HorizontalAlignment = HorizontalAlignment.Left,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Stretch
         };
 
@@ -743,8 +751,22 @@ internal sealed class TaskSettingsPageBuilder
 
         UpdateSelectedTask(getter());
 
+        ContextMenu? activeMenu = null;
+        long closedTimestamp = 0;
+
         button.Click += (_, _) =>
         {
+            if (activeMenu != null)
+            {
+                activeMenu.Close();
+                return;
+            }
+
+            if (System.Diagnostics.Stopwatch.GetElapsedTime(closedTimestamp).TotalMilliseconds < 250)
+            {
+                return;
+            }
+
             List<HotkeyType> tasks = Helpers.GetEnums<HotkeyType>()
                 .Where(task => task is not (HotkeyType.ImageEditor or HotkeyType.ImageBeautifier or HotkeyType.ImageEffects))
                 .ToList();
@@ -768,6 +790,12 @@ internal sealed class TaskSettingsPageBuilder
                 Placement = PlacementMode.BottomEdgeAlignedLeft,
                 PlacementTarget = button,
                 ItemsSource = rootItems
+            };
+            activeMenu = menu;
+            menu.Closed += (_, _) =>
+            {
+                activeMenu = null;
+                closedTimestamp = System.Diagnostics.Stopwatch.GetTimestamp();
             };
             menu.Open(button);
         };
@@ -843,8 +871,22 @@ internal sealed class TaskSettingsPageBuilder
 
         UpdateSelectedTasks();
 
+        ContextMenu? activeMenu = null;
+        long closedTimestamp = 0;
+
         button.Click += (_, _) =>
         {
+            if (activeMenu != null)
+            {
+                activeMenu.Close();
+                return;
+            }
+
+            if (System.Diagnostics.Stopwatch.GetElapsedTime(closedTimestamp).TotalMilliseconds < 250)
+            {
+                return;
+            }
+
             T selected = getter();
             List<MenuItem> items = [];
 
@@ -876,6 +918,12 @@ internal sealed class TaskSettingsPageBuilder
                 Placement = PlacementMode.BottomEdgeAlignedLeft,
                 PlacementTarget = button,
                 ItemsSource = items
+            };
+            activeMenu = menu;
+            menu.Closed += (_, _) =>
+            {
+                activeMenu = null;
+                closedTimestamp = System.Diagnostics.Stopwatch.GetTimestamp();
             };
             menu.Open(button);
         };
@@ -921,8 +969,22 @@ internal sealed class TaskSettingsPageBuilder
             HorizontalContentAlignment = HorizontalAlignment.Stretch
         };
 
+        ContextMenu? activeMenu = null;
+        long closedTimestamp = 0;
+
         button.Click += (_, _) =>
         {
+            if (activeMenu != null)
+            {
+                activeMenu.Close();
+                return;
+            }
+
+            if (System.Diagnostics.Stopwatch.GetElapsedTime(closedTimestamp).TotalMilliseconds < 250)
+            {
+                return;
+            }
+
             ContextMenu menu = new()
             {
                 Placement = PlacementMode.BottomEdgeAlignedLeft,
@@ -930,6 +992,12 @@ internal sealed class TaskSettingsPageBuilder
                 ItemsSource = MainMenuBuilder.BuildDestinationsMenu(settings)
                     .Select(CreateDestinationMenuItem)
                     .ToList()
+            };
+            activeMenu = menu;
+            menu.Closed += (_, _) =>
+            {
+                activeMenu = null;
+                closedTimestamp = System.Diagnostics.Stopwatch.GetTimestamp();
             };
             menu.Open(button);
         };

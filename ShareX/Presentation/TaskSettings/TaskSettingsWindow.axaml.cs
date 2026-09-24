@@ -42,6 +42,7 @@ public partial class TaskSettingsWindow : Window, ITaskSettingsHost
     {
         InitializeComponent();
         RequestedThemeVariant = ThemeManager.GetCurrentTheme();
+        this.ApplyDarkTitleBar();
         AttachActionArgumentsMenu();
         NotificationButtonList.ItemsSource = _notificationButtonItems;
         KeyDown += OnWindowKeyDown;
