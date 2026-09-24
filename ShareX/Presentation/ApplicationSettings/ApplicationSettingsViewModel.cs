@@ -951,7 +951,6 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
             Nav("updater", "Updater", LucideIcons.download),
             Nav("paths", Strings.ApplicationSettingsWindow_Paths, LucideIcons.folder),
             Nav("settings", Strings.ApplicationSettingsWindow_Settings, LucideIcons.database_backup),
-            Nav("recent-tasks", Strings.ApplicationSettingsWindow_RecentTasks, LucideIcons.clock),
             Nav("tray", "System Tray", LucideIcons.panel_bottom),
             Nav("advanced", Strings.ApplicationSettingsWindow_Advanced, LucideIcons.sliders_horizontal)
         ];

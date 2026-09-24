@@ -360,29 +360,6 @@
                         </StackPanel>
                     </ScrollViewer>
 
-                    <!-- History -->
-                    <ScrollViewer controls:SettingsSearch.PageId="recent-tasks" IsVisible="{Binding IsRecentTasksPage}" HorizontalContentAlignment="Stretch" HorizontalScrollBarVisibility="Disabled">
-                        <StackPanel Margin="28,24,28,32" HorizontalAlignment="Stretch">
-                            <Grid Classes="page-title" controls:SettingsSearch.IsPageTitle="True" ColumnDefinitions="Auto,*" ColumnSpacing="9">
-                                <TextBlock Classes="icon page-title-icon" Text="{x:Static theming:LucideIcons.clock}"/>
-                                <TextBlock Grid.Column="1" Classes="page-title-text" Text="{x:Static res:Strings.ApplicationSettingsWindow_RecentTasks}"/>
-                            </Grid>
-
-                            <Border Classes="section-card" controls:SettingsSearch.IsPanel="True">
-                                <StackPanel Spacing="4">
-                                    <TextBlock Classes="section-title" Text="{x:Static res:Strings.ApplicationSettingsWindow_RecentTasks}"/>
-                                    <CheckBox Classes="setting" Content="{x:Static res:Strings.ApplicationSettingsWindow_SaveRecentTasks}" IsChecked="{Binding RecentTasksSave, Mode=TwoWay}"/>
-                                    <Grid ColumnDefinitions="230,*" ColumnSpacing="8">
-                                        <TextBlock Text="{x:Static res:Strings.ApplicationSettingsWindow_MaximumNumberOfTasksToSaveLabel}" VerticalAlignment="Center" FontWeight="Normal"/>
-                                        <NumericUpDown Grid.Column="1" Classes="form-control" Minimum="1" Maximum="10000" Value="{Binding RecentTasksMaxCount, Mode=TwoWay}"/>
-                                    </Grid>
-                                    <CheckBox Classes="setting" Content="{x:Static res:Strings.ApplicationSettingsWindow_ShowRecentTasksInMainWindowOnStartup}" IsChecked="{Binding RecentTasksShowInMainWindow, Mode=TwoWay}"/>
-                                    <CheckBox Classes="setting" Content="{x:Static res:Strings.ApplicationSettingsWindow_ShowRecentTasksInTrayMenu}" IsChecked="{Binding RecentTasksShowInTrayMenu, Mode=TwoWay}"/>
-                                    <CheckBox Classes="setting" Content="{x:Static res:Strings.ApplicationSettingsWindow_InTrayMenuShowMostRecentTasksFirst}" IsChecked="{Binding RecentTasksTrayMenuMostRecentFirst, Mode=TwoWay}"/>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </ScrollViewer>
 
                     <!-- System Tray -->
                     <ScrollViewer controls:SettingsSearch.PageId="tray" IsVisible="{Binding IsTrayPage}" HorizontalContentAlignment="Stretch" HorizontalScrollBarVisibility="Disabled">
