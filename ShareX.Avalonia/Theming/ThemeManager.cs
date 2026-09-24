@@ -47,6 +47,7 @@ namespace ShareX.AvaloniaUI.Theming
 
         public static void Configure(ApplicationThemeOptions options)
         {
+            ShareX.AvaloniaUI.Controls.DropdownToggleHelper.Initialize();
             ArgumentNullException.ThrowIfNull(options);
 
             if (!ReferenceEquals(_options, options))

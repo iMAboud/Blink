@@ -46,6 +46,19 @@ namespace ShareX.AvaloniaUI.Controls
                 }
             }, RoutingStrategies.Tunnel);
 
+            ContextMenu.IsOpenProperty.Changed.AddClassHandler<ContextMenu>((menu, e) =>
+            {
+                if (e.NewValue is false)
+                {
+                    long ts = Stopwatch.GetTimestamp();
+                    menu.SetValue(LastClosedTimestampProperty, ts);
+                    if (menu.PlacementTarget is Control target)
+                    {
+                        target.SetValue(LastClosedTimestampProperty, ts);
+                    }
+                }
+            });
+
             FlyoutBase.IsOpenProperty.Changed.AddClassHandler<FlyoutBase>((flyout, e) =>
             {
                 if (e.NewValue is false)
@@ -64,6 +77,12 @@ namespace ShareX.AvaloniaUI.Controls
                 {
                     btn.SetValue(FlyoutSuppressionProperty, false);
                 }
+
+                long lastClosed = btn.GetValue(LastClosedTimestampProperty);
+                if (lastClosed > 0 && Stopwatch.GetElapsedTime(lastClosed).TotalMilliseconds < 250)
+                {
+                    e.Handled = true;
+                }
             }, RoutingStrategies.Tunnel);
 
             Button.ClickEvent.AddClassHandler<Button>((btn, e) =>
@@ -79,6 +98,11 @@ namespace ShareX.AvaloniaUI.Controls
 
         public static readonly AttachedProperty<bool> FlyoutSuppressionProperty =
             AvaloniaProperty.RegisterAttached<Button, bool>("FlyoutSuppression", typeof(DropdownToggleHelper));
+
+        public static void Initialize()
+        {
+            // Initializes static constructor and registers class handlers
+        }
 
         public static void Toggle(Popup? popup, int suppressionWindowMs = 250)
         {

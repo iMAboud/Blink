@@ -28,6 +28,8 @@ namespace ShareX;
 public partial class HotkeySettingsView : UserControl, IDisposable
 {
     private HotkeySettingsViewModel? _viewModel;
+    private ContextMenu? _activeTaskMenu;
+    private long _activeTaskMenuClosedTimestamp;
 
     public HotkeySettingsView() : this(CreateDefaultService())
     {
@@ -89,6 +91,64 @@ public partial class HotkeySettingsView : UserControl, IDisposable
     }
     private void OnConfirmResetClick(object? sender, RoutedEventArgs e) => _viewModel?.ConfirmReset();
 
+    private void OnHotkeyItemPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is Control { DataContext: HotkeySettingsItem item })
+        {
+            if (e.GetCurrentPoint(sender as Control).Properties.PointerUpdateKind == PointerUpdateKind.RightButtonPressed)
+            {
+                if (_viewModel != null)
+                {
+                    _viewModel.SelectedItem = item;
+                }
+            }
+        }
+    }
+
+    private void OnContextMenuEditClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem { DataContext: HotkeySettingsItem item })
+        {
+            _viewModel?.EditTask(item);
+        }
+        else
+        {
+            _viewModel?.EditSelectedTask();
+        }
+    }
+
+    private void OnContextMenuDuplicateClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem { DataContext: HotkeySettingsItem item })
+        {
+            if (_viewModel != null)
+            {
+                _viewModel.SelectedItem = item;
+                _viewModel.DuplicateSelected();
+            }
+        }
+        else
+        {
+            _viewModel?.DuplicateSelected();
+        }
+    }
+
+    private void OnContextMenuRemoveClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem { DataContext: HotkeySettingsItem item })
+        {
+            if (_viewModel != null)
+            {
+                _viewModel.SelectedItem = item;
+                _viewModel.RemoveSelected();
+            }
+        }
+        else
+        {
+            _viewModel?.RemoveSelected();
+        }
+    }
+
     private void OnEditRowClick(object? sender, RoutedEventArgs e)
     {
         if (sender is Control { DataContext: HotkeySettingsItem item })
@@ -100,6 +160,17 @@ public partial class HotkeySettingsView : UserControl, IDisposable
     private void OnTaskClick(object? sender, RoutedEventArgs e)
     {
         if (_viewModel == null || sender is not Button { DataContext: HotkeySettingsItem item } button)
+        {
+            return;
+        }
+
+        if (_activeTaskMenu != null)
+        {
+            _activeTaskMenu.Close();
+            return;
+        }
+
+        if (System.Diagnostics.Stopwatch.GetElapsedTime(_activeTaskMenuClosedTimestamp).TotalMilliseconds < 250)
         {
             return;
         }
@@ -131,6 +202,12 @@ public partial class HotkeySettingsView : UserControl, IDisposable
             Placement = PlacementMode.BottomEdgeAlignedLeft,
             PlacementTarget = button,
             ItemsSource = rootItems
+        };
+        _activeTaskMenu = menu;
+        menu.Closed += (_, _) =>
+        {
+            _activeTaskMenu = null;
+            _activeTaskMenuClosedTimestamp = System.Diagnostics.Stopwatch.GetTimestamp();
         };
         menu.Open(button);
     }
