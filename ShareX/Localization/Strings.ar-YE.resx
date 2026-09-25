@@ -2105,6 +2105,9 @@
   <data name="TaskSettingsWindow_AutomaticallyHideOnScreenCapture" xml:space="preserve">
     <value>الإخفاء تلقائيًا أثناء التقاط الشاشة</value>
   </data>
+  <data name="TaskSettingsWindow_HideFileNameAndPath" xml:space="preserve">
+    <value>Hide file name and path</value>
+  </data>
   <data name="TaskSettingsWindow_BackgroundDimStrengthPercent" xml:space="preserve">
     <value>قوة تعتيم الخلفية (%):</value>
   </data>

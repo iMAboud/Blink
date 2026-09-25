@@ -219,6 +219,7 @@ internal sealed class TaskSettingsPageBuilder
         buttonsPanel.Children.Add(configureButton);
         toastOptions.Children.Add(Row(Strings.TaskSettingsWindow_NotificationButtonsLabel, buttonsPanel, VerticalAlignment.Top));
         toastOptions.Children.Add(Check(Strings.TaskSettingsWindow_AutomaticallyHideOnScreenCapture, () => general.ToastWindowAutoHide, value => general.ToastWindowAutoHide = value));
+        toastOptions.Children.Add(Check(Strings.TaskSettingsWindow_HideFileNameAndPath, () => general.ToastWindowHideFileNameAndPath, value => general.ToastWindowHideFileNameAndPath = value));
         toastOptions.Children.Add(Check(Strings.TaskSettingsWindow_DisableToastNotificationsOnFullscreen, () => general.DisableNotificationsOnFullscreen, value => general.DisableNotificationsOnFullscreen = value));
         BindVisible(toastOptions, showToast);
 

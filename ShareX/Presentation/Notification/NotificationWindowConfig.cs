@@ -57,6 +57,7 @@ namespace ShareX
         public ToastClickAction Mouse5ClickAction { get; set; }
         public int ActionButtonSize { get; set; } = 40;
         public List<NotificationActionButton> ActionButtons { get; set; } = NotificationActionButton.CreateDefaultButtons();
+        public bool HideFileNameAndPath { get; set; }
 
         public void Dispose()
         {

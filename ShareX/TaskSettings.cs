@@ -321,6 +321,7 @@ namespace ShareX
         public int ToastWindowButtonSize = 40;
         public List<NotificationActionButton> ToastWindowButtons = NotificationActionButton.CreateDefaultButtons();
         public bool ToastWindowAutoHide = true;
+        public bool ToastWindowHideFileNameAndPath = true;
         public bool DisableNotificationsOnFullscreen = false;
         public bool UseCustomCaptureSound = false;
         public string CustomCaptureSoundPath = "";
