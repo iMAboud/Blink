@@ -207,11 +207,12 @@ public partial class NotificationWindow : Window
     private void ApplyContent(NotificationWindowConfig config)
     {
         bool hasImage = _previewBitmap != null;
-        bool hasTitle = !string.IsNullOrWhiteSpace(config.Title);
-        bool hasText = !string.IsNullOrWhiteSpace(config.Text);
+        bool hideFileNameAndPath = config.HideFileNameAndPath;
+        bool hasTitle = !hideFileNameAndPath && !string.IsNullOrWhiteSpace(config.Title);
+        bool hasText = !hideFileNameAndPath && !string.IsNullOrWhiteSpace(config.Text);
         bool hasCaption = hasImage && (hasTitle || hasText);
 
-        TextContent.IsVisible = !hasImage;
+        TextContent.IsVisible = !hasImage && !hideFileNameAndPath;
         ImageCaption.IsVisible = hasCaption;
         TitleText.Text = config.Title ?? string.Empty;
         BodyText.Text = config.Text ?? string.Empty;

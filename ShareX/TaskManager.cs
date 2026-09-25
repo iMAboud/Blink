@@ -276,7 +276,8 @@ namespace ShareX
                                         Image = task.Image,
                                         Title = "Blink - " + Strings.TaskManager_task_UploadCompleted_ShareX___Task_completed,
                                         Text = result,
-                                        URL = info.Result.ToString()
+                                        URL = info.Result.ToString(),
+                                        HideFileNameAndPath = info.TaskSettings.GeneralSettings.ToastWindowHideFileNameAndPath
                                     };
 
                                     NotificationWindow.Show(toastConfig);

@@ -2108,6 +2108,9 @@ Do you want to abort the active screen recording?</value>
   <data name="TaskSettingsWindow_AutomaticallyHideOnScreenCapture" xml:space="preserve">
     <value>Automatically hide on screen capture</value>
   </data>
+  <data name="TaskSettingsWindow_HideFileNameAndPath" xml:space="preserve">
+    <value>Hide file name and path</value>
+  </data>
   <data name="TaskSettingsWindow_BackgroundDimStrengthPercent" xml:space="preserve">
     <value>Background dim strength (%):</value>
   </data>

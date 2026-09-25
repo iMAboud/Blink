@@ -462,6 +462,7 @@
             }
           ],
           "ToastWindowAutoHide": true,
+          "ToastWindowHideFileNameAndPath": true,
           "DisableNotificationsOnFullscreen": false,
           "UseCustomCaptureSound": false,
           "CustomCaptureSoundPath": "",

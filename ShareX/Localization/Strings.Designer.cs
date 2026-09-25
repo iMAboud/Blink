@@ -2753,6 +2753,11 @@ namespace ShareX.Localization {
                 return ResourceManager.GetString("TaskSettingsWindow_AutomaticallyHideOnScreenCapture", resourceCulture);
             }
         }
+        public static string TaskSettingsWindow_HideFileNameAndPath {
+            get {
+                return ResourceManager.GetString("TaskSettingsWindow_HideFileNameAndPath", resourceCulture);
+            }
+        }
         public static string TaskSettingsWindow_DisableToastNotificationsOnFullscreen {
             get {
                 return ResourceManager.GetString("TaskSettingsWindow_DisableToastNotificationsOnFullscreen", resourceCulture);
