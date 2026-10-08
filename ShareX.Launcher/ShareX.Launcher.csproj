@@ -5,7 +5,7 @@
     <AssemblyName>Blink</AssemblyName>
     <Product>Blink</Product>
     <Title>Blink</Title>
-    <Company>Blink Team</Company>
+    <Company>iMAboud</Company>
     <ApplicationIcon>Blink.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <PlatformTarget>x64</PlatformTarget>
