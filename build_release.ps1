@@ -15,13 +15,13 @@ if (Test-Path $releaseDir) {
 }
 New-Item -ItemType Directory -Path $appStagingDir -Force | Out-Null
 
-dotnet publish (Join-Path $rootDir "ShareX\ShareX.csproj") -c Release -r win-x64 --self-contained false -p:EnableWindowsTargeting=true -o $appStagingDir
+dotnet publish (Join-Path $rootDir "ShareX\ShareX.csproj") -c Release -r win-x64 --self-contained true -p:EnableWindowsTargeting=true -o $appStagingDir
 if ($LASTEXITCODE -ne 0) {
     throw "ShareX publish failed."
 }
 
 Write-Host "Publishing Blink Updater..." -ForegroundColor Cyan
-dotnet publish (Join-Path $rootDir "ShareX.Updater\ShareX.Updater.csproj") -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:EnableWindowsTargeting=true -o $appStagingDir
+dotnet publish (Join-Path $rootDir "ShareX.Updater\ShareX.Updater.csproj") -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableWindowsTargeting=true -o $appStagingDir
 if ($LASTEXITCODE -ne 0) {
     throw "Updater publish failed."
 }
