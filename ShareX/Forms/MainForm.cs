@@ -62,15 +62,9 @@ public sealed class MainForm : HotkeyForm
 
         await UpdateControls();
 
-        bool showMainWindow = !(Program.SilentRun || Program.Settings.SilentRun) || !Program.Settings.ShowTray;
         MainWindowIntegration.Initialize(TrayIconService, false);
 
         // MouseHighlighter startup deactivated to optimize resource footprint
-
-        if (showMainWindow)
-        {
-            SettingsIntegration.Show();
-        }
 
         DebugHelper.WriteLine("Startup time: {0} ms", Program.StartTimer.ElapsedMilliseconds);
 

@@ -323,6 +323,8 @@ namespace ShareX
 
         private static void ApplicationConfigBackwardCompatibilityTasks()
         {
+            Settings.SilentRun = true;
+
             if (!Settings.IsFirstTimeRun || (Settings.FirstTimeRunDate != default && Settings.FirstTimeRunDate < DateTime.Now.AddMinutes(-1)))
             {
                 Settings.ShowStartScreen = false;

@@ -182,13 +182,10 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
             if (SetSetting(Settings.ShowTray, value, x => Settings.ShowTray = x))
             {
                 MainWindowIntegration.SetTrayVisible(value);
-                OnPropertyChanged(nameof(SilentRunEnabled));
             }
         }
     }
 
-    public bool SilentRunEnabled => ShowTray;
-    public bool SilentRun { get => Settings.SilentRun; set => SetSetting(Settings.SilentRun, value, x => Settings.SilentRun = x); }
     public bool TrayIconProgressEnabled { get => Settings.TrayIconProgressEnabled; set => SetSetting(Settings.TrayIconProgressEnabled, value, x => Settings.TrayIconProgressEnabled = x); }
 
     public bool TaskbarProgressEnabled

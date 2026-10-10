@@ -362,7 +362,7 @@ namespace ShareX
                 DebugHelper.WriteException(e);
             }
 
-            if (Settings.ShowStartScreen && Settings.IsFirstTimeRun)
+            if (!SilentRun && Settings.ShowStartScreen && Settings.IsFirstTimeRun)
             {
                 DebugHelper.WriteLine("Start screen opening.");
                 StartScreenWindow startScreen = new StartScreenWindow();
