@@ -17,6 +17,7 @@
     <ApplicationUseCompatibleTextRendering>false</ApplicationUseCompatibleTextRendering>
     <ApplicationDefaultFont>Microsoft Sans Serif, 8.25pt</ApplicationDefaultFont>
     <CETCompat>false</CETCompat>
+    <SelfContained>true</SelfContained>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" />
