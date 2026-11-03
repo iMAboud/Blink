@@ -42,7 +42,7 @@ namespace ShareX.HelpersLib
 
         public static string GetWindowText(IntPtr handle)
         {
-            if (handle.ToInt32() > 0)
+            if (handle != IntPtr.Zero)
             {
                 try
                 {
@@ -77,13 +77,13 @@ namespace ShareX.HelpersLib
         {
             using (Process process = GetForegroundWindowProcess())
             {
-                return process?.ProcessName;
+                try { return process?.ProcessName; } catch { return null; }
             }
         }
 
         public static Process GetProcessByWindowHandle(IntPtr hwnd)
         {
-            if (hwnd.ToInt32() > 0)
+            if (hwnd != IntPtr.Zero)
             {
                 try
                 {
@@ -105,7 +105,7 @@ namespace ShareX.HelpersLib
 
         public static string GetClassName(IntPtr handle)
         {
-            if (handle.ToInt32() > 0)
+            if (handle != IntPtr.Zero)
             {
                 StringBuilder sb = new StringBuilder(256);
 
@@ -407,6 +407,47 @@ namespace ShareX.HelpersLib
         public static bool IsActive(IntPtr handle)
         {
             return GetForegroundWindow() == handle;
+        }
+
+        public static void ForceActivate(IntPtr handle)
+        {
+            if (handle == IntPtr.Zero)
+            {
+                return;
+            }
+
+            try
+            {
+                IntPtr fgWindow = GetForegroundWindow();
+                uint fgThread = fgWindow != IntPtr.Zero ? GetWindowThreadProcessId(fgWindow, out _) : 0;
+                uint currentThread = GetCurrentThreadId();
+                bool attached = false;
+
+                if (fgThread != 0 && fgThread != currentThread)
+                {
+                    attached = AttachThreadInput(currentThread, fgThread, true);
+                }
+
+                try
+                {
+                    SetWindowPos(handle, (IntPtr)NativeConstants.HWND_TOPMOST, 0, 0, 0, 0,
+                        SetWindowPosFlags.SWP_NOMOVE | SetWindowPosFlags.SWP_NOSIZE | SetWindowPosFlags.SWP_SHOWWINDOW);
+                    BringWindowToTop(handle);
+                    SetForegroundWindow(handle);
+                    SetActiveWindow(handle);
+                }
+                finally
+                {
+                    if (attached)
+                    {
+                        AttachThreadInput(currentThread, fgThread, false);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                DebugHelper.WriteException(e);
+            }
         }
 
         public static void RestoreWindow(IntPtr handle)

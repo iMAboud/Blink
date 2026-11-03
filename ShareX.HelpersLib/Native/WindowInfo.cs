@@ -1,4 +1,4 @@
-﻿#region License Information (GPL v3)
+#region License Information (GPL v3)
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
@@ -47,7 +47,7 @@ namespace ShareX.HelpersLib
             {
                 using (Process process = Process)
                 {
-                    return process?.ProcessName;
+                    try { return process?.ProcessName; } catch { return null; }
                 }
             }
         }
@@ -58,7 +58,7 @@ namespace ShareX.HelpersLib
             {
                 using (Process process = Process)
                 {
-                    return process?.MainModule?.FileName;
+                    try { return process?.MainModule?.FileName; } catch { return null; }
                 }
             }
         }
@@ -71,7 +71,7 @@ namespace ShareX.HelpersLib
             {
                 using (Process process = Process)
                 {
-                    return process.Id;
+                    try { return process?.Id ?? 0; } catch { return 0; }
                 }
             }
         }

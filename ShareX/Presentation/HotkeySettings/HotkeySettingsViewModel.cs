@@ -82,6 +82,7 @@ public sealed class HotkeySettingsViewModel : INotifyPropertyChanged, IDisposabl
     {
         _service = service;
         _service.StateChanged += OnServiceStateChanged;
+        _service.GestureCaptured += OnServiceGestureCaptured;
         Reload();
     }
 
@@ -264,6 +265,17 @@ public sealed class HotkeySettingsViewModel : INotifyPropertyChanged, IDisposabl
         Dispatcher.UIThread.Post(RefreshAll);
     }
 
+    private void OnServiceGestureCaptured(HotkeyGesture gesture)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (_capturingItem != null)
+            {
+                ApplyGesture(_capturingItem, gesture);
+            }
+        });
+    }
+
     private void NotifyCollectionStateChanged()
     {
         OnPropertyChanged(nameof(CanMove));
@@ -280,6 +292,7 @@ public sealed class HotkeySettingsViewModel : INotifyPropertyChanged, IDisposabl
         _disposed = true;
         StopCapture();
         _service.StateChanged -= OnServiceStateChanged;
+        _service.GestureCaptured -= OnServiceGestureCaptured;
         _service.Dispose();
     }
 

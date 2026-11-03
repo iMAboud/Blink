@@ -105,7 +105,7 @@ namespace ShareX
 
                 if (result.WindowInfo != null)
                 {
-                    metadata.UpdateInfo(result.WindowInfo);
+                    try { metadata.UpdateInfo(result.WindowInfo); } catch (System.Exception ex) { DebugHelper.WriteException(ex); }
                 }
 
                 return metadata;

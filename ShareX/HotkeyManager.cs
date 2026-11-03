@@ -37,7 +37,21 @@ namespace ShareX
     public class HotkeyManager
     {
         public List<HotkeySettings> Hotkeys { get; private set; }
-        public bool IgnoreHotkeys { get; set; }
+        private bool ignoreHotkeys;
+        public bool IgnoreHotkeys
+        {
+            get => ignoreHotkeys;
+            set
+            {
+                ignoreHotkeys = value;
+                if (hotkeyForm != null)
+                {
+                    hotkeyForm.IgnoreHotkeys = value;
+                }
+            }
+        }
+
+        public event System.Action<Keys, Modifiers> CapturingKeyPressed;
 
         public delegate void HotkeyTriggerEventHandler(HotkeySettings hotkeySetting);
         public delegate void HotkeysToggledEventHandler(bool hotkeysEnabled);
@@ -51,6 +65,7 @@ namespace ShareX
         {
             hotkeyForm = form;
             hotkeyForm.HotkeyPress += HotkeyForm_HotkeyPress;
+            hotkeyForm.CapturingKeyPressed += (key, mod) => CapturingKeyPressed?.Invoke(key, mod);
             hotkeyForm.FormClosed += HotkeyForm_FormClosed;
         }
 

@@ -54,14 +54,10 @@ public partial class RegionCaptureWindow : Window
     private AvaloniaCanvas _regionResizeNodeCanvas = null!;
     private LayoutTransformControl _regionTransform = null!;
     private StackPanel _magnifierPanel = null!;
-    private Grid _magnifierView = null!;
-    private Image _magnifierImage = null!;
-    private MagnifierPixelGrid _magnifierPixelGrid = null!;
     private Border _pointerInfoPanel = null!;
     private TextBlock _pointerInfoText = null!;
     private Border _selectionInfoPanel = null!;
     private TextBlock _selectionInfoText = null!;
-    private WriteableBitmap? _magnifierBitmap;
     private IReadOnlyList<SimpleWindowInfo> _windows = Array.Empty<SimpleWindowInfo>();
     private readonly Dictionary<SelectionResizeNodeKind, Border> _regionResizeNodes = [];
     private SimpleWindowInfo? _hoverCandidate;
@@ -86,9 +82,7 @@ public partial class RegionCaptureWindow : Window
     {
         RequestedThemeVariant = ThemeManager.GetCurrentTheme();
         AvaloniaXamlLoader.Load(this);
-#if !DEBUG
         Topmost = true;
-#endif
         ResolveControls();
     }
 
@@ -123,8 +117,6 @@ public partial class RegionCaptureWindow : Window
 
         try
         {
-            _magnifierBitmap?.Dispose();
-            _magnifierBitmap = null;
             _request?.Screenshot.Dispose();
             _request?.CursorBitmap?.Dispose();
         }
@@ -241,9 +233,6 @@ public partial class RegionCaptureWindow : Window
         _regionTransform = this.FindControl<LayoutTransformControl>("RegionTransform")!;
         _magnifierPanel = this.FindControl<StackPanel>("MagnifierPanel")!;
         _magnifierPanel.RenderTransform = _magnifierTransform;
-        _magnifierView = this.FindControl<Grid>("MagnifierView")!;
-        _magnifierImage = this.FindControl<Image>("MagnifierImage")!;
-        _magnifierPixelGrid = this.FindControl<MagnifierPixelGrid>("MagnifierPixelGrid")!;
         _pointerInfoPanel = this.FindControl<Border>("PointerInfoPanel")!;
         _pointerInfoText = this.FindControl<TextBlock>("PointerInfoText")!;
         _selectionInfoPanel = this.FindControl<Border>("SelectionInfoPanel")!;
@@ -265,57 +254,9 @@ public partial class RegionCaptureWindow : Window
         _regionInputSurface.Cursor = CursorAssetLoader.GetCrosshairCursor(GetInitialScaling());
         InitializeRegionResizeNodes();
 
-        _magnifierView.IsVisible = _request.RegionCaptureOptions.ShowMagnifier;
-        ApplyMagnifierShape();
         _pointerInfoPanel.IsVisible = _request.RegionCaptureOptions.ShowInfo;
-        _magnifierPanel.IsVisible = _magnifierView.IsVisible || _pointerInfoPanel.IsVisible;
+        _magnifierPanel.IsVisible = _pointerInfoPanel.IsVisible;
         Title = Localization.Strings.BaseRegionForm_InitializeComponent_Region_capture;
-    }
-
-    private void ApplyMagnifierShape()
-    {
-        if (_request == null)
-        {
-            return;
-        }
-
-        RegionCaptureOptions options = _request.RegionCaptureOptions;
-        int magnifierSize = Math.Clamp(options.MagnifierSize,
-            RegionCaptureOptions.MagnifierSizeMinimum,
-            RegionCaptureOptions.MagnifierSizeMaximum);
-        options.MagnifierSize = magnifierSize;
-        double outerSize = magnifierSize + 2;
-        bool useSquare = options.UseSquareMagnifier;
-
-        _magnifierView.Width = outerSize;
-        _magnifierView.Height = outerSize;
-
-        Ellipse circleOuter = this.FindControl<Ellipse>("MagnifierCircleOuter")!;
-        Border squareOuter = this.FindControl<Border>("MagnifierSquareOuter")!;
-        circleOuter.IsVisible = !useSquare;
-        squareOuter.IsVisible = useSquare;
-        circleOuter.Width = outerSize;
-        circleOuter.Height = outerSize;
-        squareOuter.Width = outerSize;
-        squareOuter.Height = outerSize;
-
-        Ellipse circleInner = this.FindControl<Ellipse>("MagnifierCircleInner")!;
-        Border squareInner = this.FindControl<Border>("MagnifierSquareInner")!;
-        circleInner.IsVisible = !useSquare;
-        squareInner.IsVisible = useSquare;
-        circleInner.Width = magnifierSize;
-        circleInner.Height = magnifierSize;
-        squareInner.Width = magnifierSize;
-        squareInner.Height = magnifierSize;
-
-        Grid magnifierContent = this.FindControl<Grid>("MagnifierContent")!;
-        magnifierContent.Width = magnifierSize;
-        magnifierContent.Height = magnifierSize;
-        _magnifierImage.Width = magnifierSize;
-        _magnifierImage.Height = magnifierSize;
-        magnifierContent.Clip = useSquare
-            ? null
-            : new EllipseGeometry(new Rect(0, 0, magnifierSize, magnifierSize));
     }
 
     private void InitializeRegionResizeNodes()
@@ -377,6 +318,12 @@ public partial class RegionCaptureWindow : Window
 
             _backgroundImage.Source = BitmapConversionHelpers.ToAvaloniBitmap(_request.Screenshot);
 
+            if (!_request.RegionCaptureOptions.ActiveMonitorMode)
+            {
+                System.Windows.Forms.Cursor.Clip = DrawingRectangle.Empty;
+            }
+
+            NativeMethods.ForceActivate(TryGetPlatformHandle()?.Handle ?? IntPtr.Zero);
             Activate();
             Focus();
             _regionInputSurface.Focus();
@@ -694,23 +641,6 @@ public partial class RegionCaptureWindow : Window
         return true;
     }
 
-    private void OnRegionPointerWheelChanged(object? sender, PointerWheelEventArgs e)
-    {
-        if (_request == null)
-        {
-            return;
-        }
-
-        int delta = e.Delta.Y > 0 ? -2 : 2;
-        int count = NormalizeMagnifierPixelCount(_request.RegionCaptureOptions.MagnifierPixelCount + delta);
-
-        _request.RegionCaptureOptions.MagnifierPixelCount = count;
-        _request.RegionCaptureOptions.ShowMagnifier = true;
-        RecreateMagnifierBitmap();
-        UpdateHud(_lastPointerPoint);
-        e.Handled = true;
-    }
-
     private void UpdateHover(Point imagePoint)
     {
         if (_request == null || HasValidSelection() || _interaction != RegionInteraction.None)
@@ -906,18 +836,11 @@ public partial class RegionCaptureWindow : Window
 
         _regionOverlay.CursorPosition = imagePoint;
 
-        bool showMagnifier = _request.RegionCaptureOptions.ShowMagnifier;
         bool showInfo = _request.RegionCaptureOptions.ShowInfo;
 
-        if (showMagnifier || showInfo)
+        if (showInfo)
         {
-            if (showMagnifier)
-            {
-                UpdateMagnifier(imagePoint);
-            }
-
-            _magnifierView.IsVisible = showMagnifier;
-            _pointerInfoPanel.IsVisible = showInfo;
+            _pointerInfoPanel.IsVisible = true;
             _magnifierPanel.IsVisible = true;
             _pointerInfoText.Text = GetPointerInfoText(imagePoint);
 
@@ -966,115 +889,6 @@ public partial class RegionCaptureWindow : Window
         return $"X: {screenPosition.X} Y: {screenPosition.Y}";
     }
 
-    private unsafe void UpdateMagnifier(Point imagePoint)
-    {
-        if (_request == null)
-        {
-            return;
-        }
-
-        EnsureMagnifierBitmap();
-        if (_magnifierBitmap == null)
-        {
-            return;
-        }
-
-        int count = _magnifierBitmap.PixelSize.Width;
-        int radius = count / 2;
-        int centerX = (int)Math.Round(imagePoint.X);
-        int centerY = (int)Math.Round(imagePoint.Y);
-
-        using ILockedFramebuffer framebuffer = _magnifierBitmap.Lock();
-        byte* destination = (byte*)framebuffer.Address;
-
-        for (int y = 0; y < count; y++)
-        {
-            byte* row = destination + y * framebuffer.RowBytes;
-            int sourceY = Math.Clamp(centerY + y - radius, 0, _imageHeight - 1);
-
-            for (int x = 0; x < count; x++)
-            {
-                int sourceX = Math.Clamp(centerX + x - radius, 0, _imageWidth - 1);
-                SKColor color = _request.Screenshot.GetPixel(sourceX, sourceY);
-                int offset = x * 4;
-                row[offset] = color.Blue;
-                row[offset + 1] = color.Green;
-                row[offset + 2] = color.Red;
-                row[offset + 3] = color.Alpha;
-            }
-        }
-    }
-
-    private void EnsureMagnifierBitmap()
-    {
-        if (_request == null)
-        {
-            return;
-        }
-
-        int count = NormalizeMagnifierPixelCount(_request.RegionCaptureOptions.MagnifierPixelCount);
-
-        if (_magnifierBitmap?.PixelSize == new PixelSize(count, count))
-        {
-            return;
-        }
-
-        RecreateMagnifierBitmap(count);
-    }
-
-    private void RecreateMagnifierBitmap(int? requestedCount = null)
-    {
-        if (_request == null)
-        {
-            return;
-        }
-
-        int count = NormalizeMagnifierPixelCount(requestedCount ?? _request.RegionCaptureOptions.MagnifierPixelCount);
-        _request.RegionCaptureOptions.MagnifierPixelCount = count;
-
-        if (_magnifierBitmap?.PixelSize == new PixelSize(count, count))
-        {
-            _magnifierPixelGrid.PixelCount = count;
-            return;
-        }
-
-        _magnifierBitmap?.Dispose();
-        _magnifierBitmap = new WriteableBitmap(
-            new PixelSize(count, count),
-            new Vector(96, 96),
-            PixelFormat.Bgra8888,
-            AlphaFormat.Premul);
-        _magnifierImage.Source = _magnifierBitmap;
-        _magnifierPixelGrid.PixelCount = count;
-    }
-
-    private int NormalizeMagnifierPixelCount(int requestedCount)
-    {
-        double scale = double.IsFinite(RenderScaling) && RenderScaling > 0 ? RenderScaling : 1;
-        int magnifierSize = Math.Clamp(_request?.RegionCaptureOptions.MagnifierSize ?? RegionCaptureOptions.MagnifierSizeMinimum,
-            RegionCaptureOptions.MagnifierSizeMinimum,
-            RegionCaptureOptions.MagnifierSizeMaximum);
-        int sizeLimitedMaximum = (int)Math.Floor(
-            magnifierSize * scale / RegionCaptureOptions.MagnifierPixelSizeMinimum);
-        int maximum = Math.Clamp(
-            sizeLimitedMaximum,
-            RegionCaptureOptions.MagnifierPixelCountMinimum,
-            RegionCaptureOptions.MagnifierPixelCountMaximum);
-
-        if ((maximum & 1) == 0)
-        {
-            maximum--;
-        }
-
-        int count = Math.Clamp(requestedCount, RegionCaptureOptions.MagnifierPixelCountMinimum, maximum);
-        if ((count & 1) == 0)
-        {
-            count = count < maximum ? count + 1 : count - 1;
-        }
-
-        return count;
-    }
-
     private void UpdateSelectionInfo()
     {
         if (_request?.RegionCaptureOptions.ShowInfo != true)
@@ -1111,8 +925,8 @@ public partial class RegionCaptureWindow : Window
     private void PositionPanelNearPointer(Control panel, Point pointer, double offset)
     {
         bool isMagnifierPanel = ReferenceEquals(panel, _magnifierPanel);
-        double fallbackWidth = isMagnifierPanel ? _magnifierView.Width : 170;
-        double fallbackHeight = isMagnifierPanel ? _magnifierView.Height + 53 : 205;
+        double fallbackWidth = 170;
+        double fallbackHeight = isMagnifierPanel ? 53 : 205;
         double width = panel.Bounds.Width > 0 ? panel.Bounds.Width : fallbackWidth;
         double height = panel.Bounds.Height > 0 ? panel.Bounds.Height : fallbackHeight;
         double x = pointer.X + offset;
@@ -1138,7 +952,6 @@ public partial class RegionCaptureWindow : Window
             targetY = Math.Round(targetY * scale) / scale;
             _magnifierTransform.X = targetX;
             _magnifierTransform.Y = targetY;
-            _magnifierPixelGrid.InvalidateVisual();
         }
         else
         {

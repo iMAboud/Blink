@@ -20,8 +20,7 @@
                   Focusable="True"
                   PointerPressed="OnRegionPointerPressed"
                   PointerMoved="OnRegionPointerMoved"
-                  PointerReleased="OnRegionPointerReleased"
-                  PointerWheelChanged="OnRegionPointerWheelChanged">
+                  PointerReleased="OnRegionPointerReleased">
                 <Image x:Name="BackgroundImage"
                        Stretch="Fill"
                        IsHitTestVisible="False"/>
@@ -37,32 +36,6 @@
             <StackPanel x:Name="MagnifierPanel"
                         Spacing="10"
                         IsVisible="False">
-                <Grid x:Name="MagnifierView">
-                    <!-- Legacy magnifier: white outer ring around a black inner ring. -->
-                    <Ellipse x:Name="MagnifierCircleOuter" Fill="White"/>
-                    <Border x:Name="MagnifierSquareOuter"
-                            Background="White"
-                            IsVisible="False"/>
-                    <Grid x:Name="MagnifierContent">
-                        <Image x:Name="MagnifierImage"
-                               Stretch="Fill"
-                               RenderOptions.BitmapInterpolationMode="None"/>
-                        <capture:MagnifierPixelGrid x:Name="MagnifierPixelGrid"
-                                                    AccentBrush="{DynamicResource ShareX.Brush.Accent.Start}"
-                                                    RenderOptions.EdgeMode="Aliased"
-                                                    IsHitTestVisible="False"/>
-                    </Grid>
-                    <Ellipse x:Name="MagnifierCircleInner"
-                             Stroke="Black"
-                             StrokeThickness="1"
-                             IsHitTestVisible="False"/>
-                    <Border x:Name="MagnifierSquareInner"
-                            BorderBrush="Black"
-                            BorderThickness="1"
-                            IsVisible="False"
-                            IsHitTestVisible="False"
-                            RenderOptions.EdgeMode="Aliased"/>
-                </Grid>
                 <Border x:Name="PointerInfoPanel"
                         HorizontalAlignment="Center"
                         Padding="7,4"

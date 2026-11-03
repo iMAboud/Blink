@@ -55,6 +55,37 @@ namespace ShareX
         }
 
         private const string StartupApprovedKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\StartupFolder";
+
+        private static void UpdateElevatedScheduledTask(bool enable)
+        {
+            if (!Program.IsAdmin)
+            {
+                return;
+            }
+
+            try
+            {
+                string arguments = enable
+                    ? $"/Create /TN \"Blink\" /TR \"\\\"{StartupTargetPath}\\\" -silent\" /SC ONLOGON /RL HIGHEST /F"
+                    : "/Delete /TN \"Blink\" /F";
+
+                using (System.Diagnostics.Process process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "schtasks.exe",
+                    Arguments = arguments,
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+                }))
+                {
+                    process?.WaitForExit(3000);
+                }
+            }
+            catch (Exception e)
+            {
+                DebugHelper.WriteException(e);
+            }
+        }
         private static readonly byte[] EnabledRegistryBytes = new byte[] { 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
         public static void EnsureStartup()
@@ -74,6 +105,7 @@ namespace ShareX
                     using (RegistryKey key = Registry.CurrentUser.CreateSubKey(StartupApprovedKey))
                     {
                         key?.SetValue("Blink.lnk", EnabledRegistryBytes, RegistryValueKind.Binary);
+                        UpdateElevatedScheduledTask(true);
                     }
                 }
             }
@@ -133,6 +165,7 @@ namespace ShareX
                         using (RegistryKey key = Registry.CurrentUser.CreateSubKey(StartupApprovedKey))
                         {
                             key?.SetValue("Blink.lnk", EnabledRegistryBytes, RegistryValueKind.Binary);
+                        UpdateElevatedScheduledTask(true);
                         }
                     }
                     catch (Exception e)
@@ -143,6 +176,7 @@ namespace ShareX
                 else if (value == StartupState.Disabled)
                 {
                     ShortcutHelpers.SetShortcut(false, Environment.SpecialFolder.Startup, "Blink", StartupTargetPath, "-silent");
+                    UpdateElevatedScheduledTask(false);
                 }
                 else
                 {

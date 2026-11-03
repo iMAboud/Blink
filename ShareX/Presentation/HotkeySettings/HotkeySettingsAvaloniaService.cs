@@ -29,6 +29,7 @@ internal sealed class HotkeySettingsAvaloniaService : IHotkeySettingsService
     private bool _disposed;
 
     public event EventHandler StateChanged;
+    public event Action<HotkeyGesture> GestureCaptured;
 
     public bool AreHotkeysDisabled => InvokeOnMainThread(() => Program.Settings.DisableHotkeys);
 
@@ -113,6 +114,7 @@ internal sealed class HotkeySettingsAvaloniaService : IHotkeySettingsService
         InvokeOnMainThread(() =>
         {
             _manager.HotkeysToggledTrigger += OnHotkeysToggled;
+            _manager.CapturingKeyPressed += OnCapturingKeyPressed;
             _manager.RegisterFailedHotkeys();
         });
     }
@@ -346,6 +348,19 @@ internal sealed class HotkeySettingsAvaloniaService : IHotkeySettingsService
         return key;
     }
 
+    private void OnCapturingKeyPressed(Keys key, Modifiers modifiers)
+    {
+        if (key == Keys.PrintScreen)
+        {
+            GestureCaptured?.Invoke(new HotkeyGesture(
+                nameof(Avalonia.Input.Key.PrintScreen),
+                modifiers.HasFlag(Modifiers.Control),
+                modifiers.HasFlag(Modifiers.Shift),
+                modifiers.HasFlag(Modifiers.Alt),
+                modifiers.HasFlag(Modifiers.Win)));
+        }
+    }
+
     private void OnHotkeysToggled(bool hotkeysDisabled)
     {
         StateChanged?.Invoke(this, EventArgs.Empty);
@@ -385,6 +400,7 @@ internal sealed class HotkeySettingsAvaloniaService : IHotkeySettingsService
         {
             _manager.IgnoreHotkeys = false;
             _manager.HotkeysToggledTrigger -= OnHotkeysToggled;
+            _manager.CapturingKeyPressed -= OnCapturingKeyPressed;
             _closed();
         });
     }

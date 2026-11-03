@@ -289,6 +289,35 @@ namespace ShareX
             DebugHelper.Init(LogsFilePath);
 
             IsAdmin = Helpers.IsAdministrator();
+#if !MicrosoftStore
+            if (!IsAdmin && !CLI.IsCommandExist("noelevate"))
+            {
+                try
+                {
+                    string elevatedArgs = args != null && args.Length > 0
+                        ? string.Join(" ", Array.ConvertAll(args, a => a.Contains(' ') ? $"\"{a}\"" : a)) + " -noelevate"
+                        : "-noelevate";
+
+                    ProcessStartInfo psi = new ProcessStartInfo
+                    {
+                        FileName = Application.ExecutablePath,
+                        Arguments = elevatedArgs,
+                        WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory,
+                        UseShellExecute = true,
+                        Verb = "runas"
+                    };
+
+                    if (Process.Start(psi) != null)
+                    {
+                        return;
+                    }
+                }
+                catch (Exception e)
+                {
+                    DebugHelper.WriteException(e, "Elevation declined or unavailable, continuing non-elevated.");
+                }
+            }
+#endif
             MultiInstance = CLI.IsCommandExist("multi", "m");
 
             using (SingleInstanceManager singleInstanceManager = new SingleInstanceManager(MutexName, PipeName, !MultiInstance, args))

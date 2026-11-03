@@ -1,4 +1,4 @@
-﻿#region License Information (GPL v3)
+#region License Information (GPL v3)
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
@@ -361,13 +361,13 @@ namespace ShareX.HelpersLib
         {
             IntPtr handle = NativeMethods.GetForegroundWindow();
 
-            if (handle.ToInt32() > 0)
+            if (handle != IntPtr.Zero)
             {
                 WindowInfo windowInfo = new WindowInfo(handle);
                 string className = windowInfo.ClassName;
                 string[] ignoreList = new string[] { "Progman", "WorkerW" };
 
-                if (ignoreList.All(ignore => !className.Equals(ignore, StringComparison.OrdinalIgnoreCase)))
+                if (!string.IsNullOrEmpty(className) && ignoreList.All(ignore => !className.Equals(ignore, StringComparison.OrdinalIgnoreCase)))
                 {
                     Rectangle windowRectangle = windowInfo.Rectangle;
                     Rectangle monitorRectangle = Screen.FromRectangle(windowRectangle).Bounds;

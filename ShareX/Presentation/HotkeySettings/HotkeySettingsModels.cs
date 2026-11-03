@@ -149,6 +149,7 @@ public sealed class HotkeySettingsItem : INotifyPropertyChanged
 public interface IHotkeySettingsService : IDisposable
 {
     event EventHandler? StateChanged;
+    event Action<HotkeyGesture>? GestureCaptured;
 
     bool AreHotkeysDisabled { get; }
     IReadOnlyList<HotkeySettingsItem> GetItems();
