@@ -93,7 +93,33 @@ static class Program
                 catch { }
             }
 
-            Thread.Sleep(1000);
+            int currentPid = Environment.ProcessId;
+            foreach (Process p in Process.GetProcessesByName("Blink"))
+            {
+                try
+                {
+                    if (p.Id != currentPid)
+                    {
+                        p.Kill();
+                        p.WaitForExit(3000);
+                    }
+                }
+                catch { }
+            }
+            foreach (Process p in Process.GetProcessesByName("updater"))
+            {
+                try
+                {
+                    if (p.Id != currentPid)
+                    {
+                        p.Kill();
+                        p.WaitForExit(3000);
+                    }
+                }
+                catch { }
+            }
+
+            Thread.Sleep(500);
 
             // Retry copy loop for target exe
             bool copied = false;

@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Sockets;
 
 namespace ShareX.HelpersLib
 {
@@ -38,6 +39,14 @@ namespace ShareX.HelpersLib
         private static readonly Dictionary<(bool AllowAutoRedirect, bool InfiniteTimeout), HttpClient> clients =
             new Dictionary<(bool AllowAutoRedirect, bool InfiniteTimeout), HttpClient>();
         private static string proxyKey;
+
+        private static readonly string[] GitHubFallbackIps = new[]
+        {
+            "185.199.108.133",
+            "185.199.109.133",
+            "185.199.110.133",
+            "185.199.111.133"
+        };
 
         public static HttpClient Create(bool allowAutoRedirect = true, bool infiniteTimeout = false)
         {
@@ -64,7 +73,33 @@ namespace ShareX.HelpersLib
                         PooledConnectionLifetime = TimeSpan.FromMinutes(10),
                         Proxy = proxy,
                         UseCookies = false,
-                        UseProxy = proxy != null
+                        UseProxy = proxy != null,
+                        ConnectCallback = async (context, cancellationToken) =>
+                        {
+                            string host = context.DnsEndPoint.Host;
+                            int port = context.DnsEndPoint.Port;
+
+                            try
+                            {
+                                System.Net.Sockets.Socket socket = new System.Net.Sockets.Socket(System.Net.Sockets.SocketType.Stream, System.Net.Sockets.ProtocolType.Tcp);
+                                await socket.ConnectAsync(host, port, cancellationToken);
+                                return new NetworkStream(socket, ownsSocket: true);
+                            }
+                            catch (Exception) when (host.Contains("githubusercontent.com", StringComparison.OrdinalIgnoreCase))
+                            {
+                                foreach (string ip in GitHubFallbackIps)
+                                {
+                                    try
+                                    {
+                                        System.Net.Sockets.Socket socket = new System.Net.Sockets.Socket(System.Net.Sockets.SocketType.Stream, System.Net.Sockets.ProtocolType.Tcp);
+                                        await socket.ConnectAsync(IPAddress.Parse(ip), port, cancellationToken);
+                                        return new NetworkStream(socket, ownsSocket: true);
+                                    }
+                                    catch { }
+                                }
+                                throw;
+                            }
+                        }
                     };
 
                     client = new HttpClient(handler)

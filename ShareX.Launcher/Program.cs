@@ -26,12 +26,19 @@ static class Program
             {
                 try
                 {
-                    if (File.GetLastWriteTimeUtc(processPath) > File.GetLastWriteTimeUtc(targetExe))
+                    FileVersionInfo launcherVer = FileVersionInfo.GetVersionInfo(processPath);
+                    FileVersionInfo targetVer = FileVersionInfo.GetVersionInfo(targetExe);
+                    if (launcherVer.ProductVersion != targetVer.ProductVersion ||
+                        launcherVer.FileVersion != targetVer.FileVersion ||
+                        File.GetLastWriteTimeUtc(processPath) != File.GetLastWriteTimeUtc(targetExe))
                     {
                         needsExtract = true;
                     }
                 }
-                catch { }
+                catch
+                {
+                    needsExtract = true;
+                }
             }
 
             if (needsExtract)
@@ -96,6 +103,15 @@ static class Program
 
             if (File.Exists(targetExe))
             {
+                try
+                {
+                    if (!string.IsNullOrEmpty(processPath) && File.Exists(processPath))
+                    {
+                        File.SetLastWriteTimeUtc(targetExe, File.GetLastWriteTimeUtc(processPath));
+                    }
+                }
+                catch { }
+
                 ProcessStartInfo psi = new ProcessStartInfo
                 {
                     FileName = targetExe,

@@ -69,7 +69,17 @@ namespace ShareX.HelpersLib
         {
             if (CurrentVersion == null)
             {
-                CurrentVersion = Version.Parse(Application.ProductVersion);
+                string prodVer = Application.ProductVersion ?? string.Empty;
+                int plusIdx = prodVer.IndexOf('+');
+                if (plusIdx >= 0) prodVer = prodVer.Substring(0, plusIdx);
+                if (Version.TryParse(prodVer, out Version parsedVersion))
+                {
+                    CurrentVersion = parsedVersion;
+                }
+                else
+                {
+                    CurrentVersion = new Version(1, 0, 0);
+                }
             }
 
             if (Status != UpdateStatus.UpdateCheckFailed && CurrentVersion != null && LatestVersion != null && !string.IsNullOrEmpty(DownloadURL) &&

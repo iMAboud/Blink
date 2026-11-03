@@ -73,10 +73,19 @@ namespace ShareX
             {
                 StringBuilder sbVersionText = new StringBuilder();
                 sbVersionText.Append("Version ");
-                Version version = Version.Parse(Application.ProductVersion);
-                sbVersionText.Append(version.Major + "." + version.Minor);
-                if (version.Build > 0 || version.Revision > 0) sbVersionText.Append("." + version.Build);
-                if (version.Revision > 0) sbVersionText.Append("." + version.Revision);
+                string prodVer = Application.ProductVersion ?? string.Empty;
+                int plusIdx = prodVer.IndexOf('+');
+                if (plusIdx >= 0) prodVer = prodVer.Substring(0, plusIdx);
+                if (Version.TryParse(prodVer, out Version version))
+                {
+                    sbVersionText.Append(version.Major + "." + version.Minor);
+                    if (version.Build > 0 || version.Revision > 0) sbVersionText.Append("." + version.Build);
+                    if (version.Revision > 0) sbVersionText.Append("." + version.Revision);
+                }
+                else
+                {
+                    sbVersionText.Append(prodVer);
+                }
                 return sbVersionText.ToString();
             }
         }

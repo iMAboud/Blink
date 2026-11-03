@@ -1,5 +1,6 @@
 param(
-    [switch]$SingleExe = $true
+    [switch]$SingleExe = $true,
+    [string]$Version = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -8,6 +9,30 @@ $rootDir = $PSScriptRoot
 $releaseDir = Join-Path $rootDir "Release"
 $appStagingDir = Join-Path $releaseDir "App"
 $binDir = Join-Path $rootDir "ShareX\bin\Release\win-x64"
+$propsPath = Join-Path $rootDir "Directory.build.props"
+
+if ($Version) {
+    $fullVer = if ($Version -match '^\d+\.\d+$') { "$Version.0" } else { $Version }
+    (Get-Content $propsPath) -replace '<Version>.*?</Version>', "<Version>$fullVer</Version>" | Set-Content $propsPath
+    Write-Host "Set build version to: $fullVer" -ForegroundColor Green
+} else {
+    try {
+        $headers = @{ "User-Agent" = "Blink-Build" }
+        $resp = Invoke-RestMethod -Uri "https://api.github.com/repos/iMAboud/Blink/releases/latest" -Headers $headers -ErrorAction Stop
+        if ($resp.tag_name) {
+            $latestTag = $resp.tag_name.TrimStart('v', 'V')
+            if ($latestTag -match '^(\d+)\.(\d+)') {
+                $nextMajor = [int]$matches[1]
+                $nextMinor = [int]$matches[2] + 1
+                $fullVer = "$nextMajor.$nextMinor.0"
+                (Get-Content $propsPath) -replace '<Version>.*?</Version>', "<Version>$fullVer</Version>" | Set-Content $propsPath
+                Write-Host "Auto-detected target version from latest GitHub release ($latestTag): $fullVer" -ForegroundColor Green
+            }
+        }
+    } catch {
+        Write-Host "Using version configured in Directory.build.props" -ForegroundColor Yellow
+    }
+}
 
 Write-Host "Publishing debloated Blink application for win-x64..." -ForegroundColor Cyan
 if (Test-Path $releaseDir) {

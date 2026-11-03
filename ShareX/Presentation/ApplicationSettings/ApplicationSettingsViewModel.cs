@@ -1457,10 +1457,8 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
     {
         try
         {
-            using (var client = new System.Net.Http.HttpClient())
-            {
-                client.DefaultRequestHeaders.Add("User-Agent", "Blink-App");
-                using (var response = await client.GetAsync(url, System.Net.Http.HttpCompletionOption.ResponseHeadersRead))
+            System.Net.Http.HttpClient client = HttpClientFactory.Create(allowAutoRedirect: true, infiniteTimeout: true);
+            using (var response = await client.GetAsync(url, System.Net.Http.HttpCompletionOption.ResponseHeadersRead))
                 {
                     response.EnsureSuccessStatusCode();
                     long? totalBytes = response.Content.Headers.ContentLength;
@@ -1483,7 +1481,6 @@ public sealed class ApplicationSettingsViewModel : INotifyPropertyChanged, IDisp
                         }
                     }
                 }
-            }
             return true;
         }
         catch (Exception ex)

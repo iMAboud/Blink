@@ -83,14 +83,11 @@ namespace ShareX
                 Directory.CreateDirectory(tempDir);
                 string downloadPath = Path.Combine(tempDir, "Blink.exe");
 
-                using (HttpClient client = new HttpClient())
+                HttpClient client = HttpClientFactory.Create(allowAutoRedirect: true, infiniteTimeout: true);
+                using (Stream stream = await client.GetStreamAsync(downloadUrl))
+                using (FileStream fileStream = new FileStream(downloadPath, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", "Blink-App");
-                    using (Stream stream = await client.GetStreamAsync(downloadUrl))
-                    using (FileStream fileStream = new FileStream(downloadPath, FileMode.Create, FileAccess.Write, FileShare.None))
-                    {
-                        await stream.CopyToAsync(fileStream);
-                    }
+                    await stream.CopyToAsync(fileStream);
                 }
 
                 if (File.Exists(downloadPath))
